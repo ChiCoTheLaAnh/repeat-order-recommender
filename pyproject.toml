@@ -1,0 +1,13 @@
+[project]
+name = "repeat-order-recommender"
+version = "0.1.0"
+description = "Raw-data audit for a repeat-first recommendation project"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas==2.3.3",
+    "openpyxl==3.1.5",
+    "pyarrow==21.0.0",
+]
+
+[tool.uv]
+package = false
