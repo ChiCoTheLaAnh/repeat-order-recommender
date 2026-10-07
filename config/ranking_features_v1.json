@@ -1,0 +1,22 @@
+{
+  "version": "ranking_features_v1",
+  "features": [
+    "ci_previously_purchased", "ci_invoice_count", "ci_days_since_last_purchase", "ci_quantity_180",
+    "item_purchasers_30", "item_purchasers_180", "item_days_since_last_purchase",
+    "customer_invoice_count_180", "customer_sku_count_180", "customer_days_since_last_purchase_180",
+    "source_history", "source_neighbors", "source_recent_popularity", "source_long_popularity",
+    "history_score", "neighbor_score", "recent_purchasers", "long_purchasers", "candidate_rank"
+  ],
+  "log1p_features": [
+    "ci_invoice_count", "ci_days_since_last_purchase", "ci_quantity_180",
+    "item_purchasers_30", "item_purchasers_180", "item_days_since_last_purchase",
+    "customer_invoice_count_180", "customer_sku_count_180", "customer_days_since_last_purchase_180",
+    "recent_purchasers", "long_purchasers", "candidate_rank"
+  ],
+  "history": "Recommendation-eligible paid purchases with invoice_date strictly less than cutoff. Customer-item counts and recency use lifetime visible personal history. Quantity uses [cutoff-180 days,cutoff).",
+  "item": "Purchaser counts use identified purchasers over [cutoff-30/180 days,cutoff). Last observed purchase uses all visible eligible paid purchases, including anonymous catalog evidence.",
+  "customer": "All three customer aggregate features use [cutoff-180 days,cutoff). Lifetime invoice counts and recency from existing query snapshots are used separately for evaluation segmentation.",
+  "retrieval": "Copy the frozen V1 candidate flags, scores and position unchanged. Popularity features deliberately duplicate the requested retrieval popularity scores; both are retained for this initial schema.",
+  "missing": "Absent counts/quantities/source scores are zero. Never-purchased customer-item recency is NaN; ci_previously_purchased distinguishes it. Logistic: training-only median imputation with missing indicators, then query-weighted standard scaling. XGBoost: native missing branches. Both apply fixed log1p to listed nonnegative skewed columns.",
+  "ids": "customer_id, query_id, SKU, cutoff and selected_source are metadata, never numeric model inputs. Features are selected in this exact order and stored as float32; labels/weights stay separate."
+}

@@ -1,0 +1,31 @@
+{
+  "version": "release_bundle_v1",
+  "serving_cutoff": "2011-05-01T00:00:00",
+  "max_candidates": 200,
+  "max_k": 20,
+  "default_k": 10,
+  "selection": {
+    "models": ["logistic", "xgb_depth5"],
+    "negligible_observed_ndcg_difference": 0.005,
+    "maximum_recall_sacrifice": 0.005,
+    "meaningful_artifact_size_ratio": 5,
+    "bootstrap_replicates": 2000,
+    "seed": 42,
+    "interpretation": "Prefer logistic if observed quality differences are small, the paired interval includes zero, and its artifact is materially smaller. This does not establish statistical equivalence."
+  },
+  "benchmark": {
+    "load_repetitions": 30,
+    "warm_queries": 500,
+    "warmup_queries": 30,
+    "seed": 42,
+    "native_threads": 4
+  },
+  "load_test": {
+    "concurrency": [1, 5],
+    "seconds_per_level": 20,
+    "warmup_requests": 50,
+    "unknown_fraction": 0.1,
+    "k": 10,
+    "target_p95_ms_at_5_clients": 250
+  }
+}
