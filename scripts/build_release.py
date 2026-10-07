@@ -27,10 +27,13 @@ def item_metadata(paid,cutoff):
 
 
 def build_release(milestone2=ROOT/'outputs/milestone2',destination=ROOT/'outputs/releases',
-                  comparison_path=ROOT/'outputs/milestone3/model_comparison.json'):
+                  comparison_path=ROOT/'outputs/milestone3/model_comparison.json',require_clean=False):
     milestone2,destination,comparison_path = Path(milestone2),Path(destination),Path(comparison_path)
     config = json.loads((ROOT/'config/release_v1.json').read_text())
     cutoff = pd.Timestamp(config['serving_cutoff'])
+    if require_clean:
+        from .cloud_deploy import clean_commit
+        clean_commit()
     if cutoff != pd.Timestamp('2011-05-01'):
         raise ValueError('Release V1 stops at the validation boundary; no test-era purchases may be loaded')
     m2_path = milestone2/'run_manifest.json'
@@ -42,10 +45,13 @@ def build_release(milestone2=ROOT/'outputs/milestone2',destination=ROOT/'outputs
         if sha256(source) != digest:
             raise ValueError('Frozen code or configuration changed: '+source.name)
     for name in ['logistic','xgb_depth5']:
-        relative = 'models/'+name+'.joblib'
-        if sha256(milestone2/relative) != m2['artifacts'][relative]['sha256']:
-            raise ValueError('Previously trained model artifact changed')
+        for extension in ['joblib','metadata.json']:
+            relative = 'models/'+name+'.'+extension
+            if sha256(milestone2/relative) != m2['artifacts'][relative]['sha256']:
+                raise ValueError('Previously trained model artifact or metadata changed')
     if not comparison_path.exists():
+        if require_clean:
+            raise ValueError('Deployable builds reuse the saved logistic selection; provide existing M3 evidence')
         compare_models(milestone2,comparison_path.parent)
     comparison = json.loads(comparison_path.read_text())
     expected_inputs = {'logistic':milestone2/'models/logistic.joblib',
@@ -57,6 +63,21 @@ def build_release(milestone2=ROOT/'outputs/milestone2',destination=ROOT/'outputs
     selected = select_model(comparison)
     if comparison['selected_model'] != selected or comparison['test_evaluated'] or comparison['models_retrained']:
         raise ValueError('Invalid model-selection evidence')
+    if require_clean and selected!='logistic':
+        raise ValueError('Cloud demo preserves the selected logistic artifact')
+    for name in ['queries.parquet','labels.parquet']:
+        if sha256(ROOT/'outputs/snapshots'/name)!=m2['inputs_sha256']['snapshots'][name]:
+            raise ValueError('Frozen snapshot data changed: '+name)
+    train_windows=pd.read_parquet(ROOT/'outputs/snapshots/queries.parquet',
+        columns=['cutoff','target_end'],filters=[('split','=','train')]).drop_duplicates().sort_values('cutoff')
+    train_labels=pd.read_parquet(ROOT/'outputs/snapshots/labels.parquet',
+        columns=['cutoff','target_end'],filters=[('split','=','train')])
+    if (not train_windows.target_end.le(cutoff).all() or not train_labels.target_end.le(cutoff).all()
+        or not train_windows.target_end.eq(train_windows.cutoff+pd.offsets.MonthBegin(1)).all()):
+        raise ValueError('Training label windows exceed serving data_as_of or changed their definition')
+    trained=json.loads((milestone2/'models/logistic.metadata.json').read_text())['training']['cutoffs']
+    if list(train_windows.cutoff.dt.strftime('%Y-%m-%d'))!=trained:
+        raise ValueError('Training-window proof differs from saved model training cutoffs')
     paid_path = ROOT/'outputs/cleaning/paid_purchases.parquet'
     input_hash = sha256(paid_path)
     if input_hash != m2['inputs_sha256']['cleaning']['paid_purchases.parquet']:
@@ -81,12 +102,15 @@ def build_release(milestone2=ROOT/'outputs/milestone2',destination=ROOT/'outputs
         'model_last_training_feature_cutoff':'2011-01-01T00:00:00',
         'model_training_label_interval':['2010-03-01T00:00:00','2011-02-01T00:00:00'],
         'model_labels_end_exclusive':'2011-02-01T00:00:00',
+        'training_label_windows':[{'cutoff':t.isoformat(),'end_exclusive':end.isoformat()}
+            for t,end in train_windows.itertuples(index=False,name=None)],
         'validation_prediction_cutoffs':['2011-02-01','2011-04-01'],
         'validation_label_interval':['2011-02-01T00:00:00','2011-05-01T00:00:00'],
         'validation_labels_end_exclusive':'2011-05-01T00:00:00',
         'code_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         'code_worktree_dirty':bool(subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True)),
-        'code_provenance':'HEAD plus complete bundled source/config hashes; dirty HEAD alone does not identify this implementation.',
+        'deployable_build':require_clean,
+        'code_provenance':'Exact HEAD plus bundled source/config hashes. Deployable builds require a clean committed revision.',
         'python_version':platform.python_version(),
         'input_sha256':{'paid_purchases':input_hash,'milestone2_manifest':sha256(m2_path),'model_comparison':sha256(comparison_path)},
         'data_access':{'paid_upper_bound_exclusive':cutoff.isoformat(),'paid_rows_loaded':len(paid),
@@ -97,9 +121,13 @@ def build_release(milestone2=ROOT/'outputs/milestone2',destination=ROOT/'outputs
         'display_policy':'Latest nonempty description on eligible paid purchases strictly before cutoff; last observation is also strictly past. Historical descriptions are not current stock/availability guarantees.',
         'fallback_policy':'Known historical catalog sorted by distinct identified purchasers in [cutoff-30 days, cutoff), then lexical SKU; zero-count catalog items backfill if needed. Anonymous purchases supply catalog only.'}
     code_paths = sorted((ROOT/'scripts').glob('*.py')) + [ROOT/'pyproject.toml',ROOT/'uv.lock']
-    for name in ['Dockerfile','.dockerignore']:
+    for name in ['Dockerfile','.dockerignore','Dockerfile.cloud','config/cloud_demo_v1.json','config/logistic_artifact_v1.json']:
         if (ROOT/name).exists():
             code_paths.append(ROOT/name)
+    if require_clean:
+        from .cloud_deploy import clean_commit
+        if clean_commit()!=provenance['code_commit']:
+            raise ValueError('Source revision changed during deployment build')
     final = create_bundle(destination,milestone2/'models'/(selected+'.joblib'),features,items,fallback,provenance,
         code_paths=code_paths,extra_paths={'model_comparison.json':comparison_path,
             'model.metadata.json':milestone2/'models'/(selected+'.metadata.json')})
@@ -117,5 +145,6 @@ if __name__ == '__main__':
     parser.add_argument('--milestone2',type=Path,default=ROOT/'outputs/milestone2')
     parser.add_argument('--destination',type=Path,default=ROOT/'outputs/releases')
     parser.add_argument('--comparison',type=Path,default=ROOT/'outputs/milestone3/model_comparison.json')
+    parser.add_argument('--deployable',action='store_true',help='Require a clean committed checkout and preserve saved logistic selection')
     args = parser.parse_args()
-    build_release(args.milestone2,args.destination,args.comparison)
+    build_release(args.milestone2,args.destination,args.comparison,args.deployable)

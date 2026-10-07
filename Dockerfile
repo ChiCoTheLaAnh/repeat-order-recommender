@@ -10,9 +10,9 @@ RUN --mount=type=secret,id=build_ca,required=false \
     uv sync --locked --no-dev
 COPY --chmod=755 scripts ./scripts
 COPY --chmod=755 config ./config
-COPY --chmod=644 Dockerfile .dockerignore ./
+COPY --chmod=644 Dockerfile Dockerfile.cloud .dockerignore ./
 USER 10001:10001
 ENV BUNDLE_PATH=/bundle
 EXPOSE 8000
-HEALTHCHECK --interval=15s --timeout=3s --start-period=30s CMD ["/app/.venv/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=2)"]
+HEALTHCHECK --interval=15s --timeout=3s --start-period=30s CMD ["/app/.venv/bin/python", "-c", "import os, urllib.request; urllib.request.urlopen('http://127.0.0.1:'+os.environ.get('PORT','8000')+'/ready', timeout=2)"]
 CMD ["/app/.venv/bin/python", "-m", "scripts.local_api", "--host", "0.0.0.0"]

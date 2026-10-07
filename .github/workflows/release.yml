@@ -1,0 +1,117 @@
+name: Deploy historical demo
+on:
+  workflow_dispatch:
+    inputs:
+      image_digest:
+        description: Full us-central1 Artifact Registry image URI at sha256 digest
+        required: true
+        type: string
+      bundle_manifest_sha256:
+        description: Expected manifest SHA256 from the reviewed release receipt
+        required: true
+        type: string
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: historical-demo-release
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    environment: historical-demo
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+      GCP_REGION: ${{ vars.GCP_REGION }}
+      RELEASE_IMAGE: ${{ inputs.image_digest }}
+      EXPECTED_MANIFEST_SHA256: ${{ inputs.bundle_manifest_sha256 }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12.14'
+      - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
+        with:
+          version: '0.12.19'
+      - run: uv sync --locked
+      - run: uv run --locked python -m unittest discover -s tests -v
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+        with:
+          version: '588.0.0'
+      - name: Validate immutable input before pulling
+        run: |
+          uv run --locked python - <<'PY'
+          import os, re
+          from scripts.cloud_deploy import config
+          assert os.environ['GCP_PROJECT_ID'] == config()['project']
+          assert os.environ['GCP_REGION'] == config()['region']
+          prefix=config()['region']+'-docker.pkg.dev/'+config()['project']+'/'+config()['repository']+'/'
+          assert re.fullmatch(re.escape(prefix)+r'[a-z0-9_./-]+@sha256:[0-9a-f]{64}',os.environ['RELEASE_IMAGE'])
+          assert re.fullmatch(r'[0-9a-f]{64}',os.environ['EXPECTED_MANIFEST_SHA256'])
+          PY
+      - name: Extract and validate embedded bundle without starting the image
+        run: |
+          gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet
+          docker pull "$RELEASE_IMAGE"
+          mkdir -p outputs/ci-release
+          container=$(docker create "$RELEASE_IMAGE")
+          trap 'docker rm "$container" >/dev/null' EXIT
+          docker cp "$container:/bundle" outputs/ci-release/bundle
+          uv run --locked python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from scripts.audit_raw import sha256
+          from scripts.cloud_deploy import clean_commit, validate_deployable_manifest
+          from scripts.release_bundle import ReleaseBundle
+          p=Path('outputs/ci-release/bundle')
+          assert sha256(p/'manifest.json')==os.environ['EXPECTED_MANIFEST_SHA256']
+          validate_deployable_manifest(json.loads((p/'manifest.json').read_text()),clean_commit())
+          ReleaseBundle.load(p)
+          PY
+      - name: Deploy immutable image
+        id: deploy
+        run: |
+          uv run --locked python -m scripts.cloud_deploy deploy \
+            --bundle outputs/ci-release/bundle --image "$RELEASE_IMAGE" \
+            --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --output outputs/ci-release
+          python - <<'PY'
+          import json, os
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+              out.write('url='+json.load(open('outputs/ci-release/deployment.json'))['url']+'\n')
+          PY
+      - name: Obtain short-lived invoker token
+        id: invoke
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+          token_format: id_token
+          id_token_audience: ${{ steps.deploy.outputs.url }}
+          create_credentials_file: false
+          export_environment_variables: false
+      - name: Post-deployment smoke checks
+        env:
+          CLOUD_RUN_ID_TOKEN: ${{ steps.invoke.outputs.id_token }}
+          CLOUD_RUN_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          uv run --locked python -m scripts.cloud_verify --smoke-only \
+            --url "$CLOUD_RUN_URL" --bundle outputs/ci-release/bundle \
+            --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --output outputs/ci-release
+      - name: Preserve deployment receipt and smoke evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: historical-demo-deployment-${{ github.sha }}
+          path: |
+            outputs/ci-release/deployment.json
+            outputs/ci-release/cloud_run_service.json
+            outputs/ci-release/cloud_verification.json
+          if-no-files-found: ignore

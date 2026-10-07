@@ -1170,9 +1170,10 @@ prospective historical inference constructed from pre-May history only.
   windows, HEAD commit, dirty-worktree indicator, exact payload/source/config
   hashes, input data/report hashes, dependency versions and evaluation summary.
 
-The current HEAD reference predates the uncommitted milestone implementation;
-the manifest explicitly says so. The bundled source hashes identify the code
-actually used; HEAD alone would not. Source-file hashes identify the complete,
+The initial M3 bundle recorded uncommitted milestone source explicitly. M4
+commits that implementation and requires a clean exact source revision for
+deployable bundles; the old dirty bundle is rejected for deployment.
+Source-file hashes identify the complete,
 unchanged input artifacts for audit provenance; only filtered pre-cutoff data
 appears in serving payloads. Snapshot eligibility, anonymous-customer scope and
 unresolved-stock-code assumptions remain as documented in earlier milestones.
@@ -1312,3 +1313,37 @@ Ordinary test execution and the actual API/Docker checks pass with the locked
 versions; strict third-party deprecation-free execution is not claimed.
 Raw, cleaning, snapshot, retrieval and all M2 artifact/source/config hashes
 remain unchanged. There were no additional fits or test quality evaluations.
+
+## Milestone 4: reproducible cloud release preparation
+
+The target is **project-c0e2b13a-3cea-47e9-aad / us-central1**, using the frozen
+logistic model and a baked-in immutable bundle. Cloud Run configuration uses
+request billing, 1 CPU/1 GiB, 0–1 instances, concurrency 5 and startup/liveness
+probes. Service access is IAM authenticated. PR CI installs locked dependencies,
+tests and builds Docker; release CI uses GitHub OIDC and an image digest.
+
+```bash
+uv sync --locked
+uv run --locked python -m unittest discover -s tests -v
+# Commit reviewed source first; this fails on a dirty checkout.
+uv run --locked python -m scripts.build_release --deployable
+uv run --locked python -m scripts.bootstrap_cloud  # local monitoring definitions
+```
+
+[Cloud operations](docs/cloud-operations.md) provides exact bundle/image build,
+project/WIF setup, deployment, cloud smoke/load measurements, privacy exclusions,
+monitoring meanings, rollback and manual serving/model-update instructions.
+`config/cloud_demo_v1.json` records the target/resource/load configuration;
+`config/logistic_artifact_v1.json` pins the previously fitted logistic artifact.
+`scripts/cloud_deploy.py` validates provenance and immutable images;
+`bootstrap_cloud.py` prepares/administers demo resources and sanitized monitoring;
+`cloud_verify.py` measures actual remote traffic separately from local tests.
+`Dockerfile.cloud` embeds the bundle without startup downloads or training.
+
+Cloud deployment is currently blocked: injected Google credentials are empty,
+the SDK has zero accounts, and the outbound proxy denies Google APIs. The
+network configuration draft is saved for application; an authorized identity
+and project access are also required. **No live URL or cloud performance result
+is claimed.** May 1 remains valid because all training labels end February 1
+and validation selection ends May 1. The original test remains unopened and
+unevaluated; there is no further model tuning or automatic retraining.

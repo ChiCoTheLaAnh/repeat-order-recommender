@@ -175,6 +175,9 @@ class ReleaseBundle:
         for name in ['model_labels_end_exclusive','validation_labels_end_exclusive']:
             if pd.Timestamp(manifest['provenance'][name]) > cutoff:
                 raise BundleValidationError('Model selection or training uses unavailable future labels')
+        if manifest['provenance'].get('deployable_build'):
+            from .cloud_deploy import validate_deployable_manifest
+            validate_deployable_manifest(manifest,manifest['provenance']['code_commit'])
         self.artifact = load_artifact(path/'model.joblib')
         if self.artifact['feature_schema'] != schema or self.artifact['name'] != manifest['model_name']:
             raise BundleValidationError('Model and feature schema mismatch')

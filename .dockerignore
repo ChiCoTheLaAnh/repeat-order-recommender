@@ -6,3 +6,4 @@ outputs
 tests
 **/__pycache__
 *.log
+gha-creds-*.json

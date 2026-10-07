@@ -103,6 +103,18 @@ class ReleaseTests(unittest.TestCase):
             self.assertEqual(client.get('/model').json()['data_as_of'],'2011-05-01T00:00:00')
             self.assertEqual(client.post('/events').status_code,404)
 
+    def test_operational_logs_report_versions_memory_and_startup_without_ids(self):
+        api=importlib.import_module('scripts.local_api')
+        with self.assertLogs('recommendation_requests',level='INFO') as logs:
+            with TestClient(api.create_app(self.path)) as client:
+                response=client.get('/recommendations/known-private-id')
+                ready=client.get('/ready').json()
+        self.assertIn('bundle_loaded',' '.join(logs.output))
+        self.assertNotIn('known-private-id',' '.join(logs.output))
+        self.assertIn('model_version',' '.join(logs.output))
+        self.assertIn('process_peak_rss_mib',ready)
+        self.assertIn('X-Instance-Start-Id',response.headers)
+
     def test_invalid_bundle_remains_live_but_not_ready(self):
         api = importlib.import_module('scripts.local_api')
         (self.path/'manifest.json').chmod(0o644)
