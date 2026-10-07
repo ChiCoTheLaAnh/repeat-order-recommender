@@ -1340,10 +1340,11 @@ monitoring meanings, rollback and manual serving/model-update instructions.
 `cloud_verify.py` measures actual remote traffic separately from local tests.
 `Dockerfile.cloud` embeds the bundle without startup downloads or training.
 
-Cloud deployment is currently blocked: injected Google credentials are empty,
-the SDK has zero accounts, and the outbound proxy denies Google APIs. The
-network configuration draft is saved for application; an authorized identity
-and project access are also required. **No live URL or cloud performance result
+Cloud deployment is currently blocked: injected Google credentials are empty
+and the SDK has zero accounts. The latest Google API probe reached Google but
+returned `401 CREDENTIALS_MISSING`; an earlier probe was proxy-blocked. The
+network configuration draft is saved for review/save and publishing; an
+authorized identity and project access are still required. **No live URL or cloud performance result
 is claimed.** May 1 remains valid because all training labels end February 1
 and validation selection ends May 1. The original test remains unopened and
 unevaluated; there is no further model tuning or automatic retraining.

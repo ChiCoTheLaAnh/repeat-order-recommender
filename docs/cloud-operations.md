@@ -31,9 +31,11 @@ before deserialization. A model update requires a reviewed new anchor/version.
   The runtime account needs no application data/model access roles.
 
 Cloud deployment has **not run** in this workspace. The injected Google ADC
-files are empty JSON objects and the SDK has zero active accounts. Connections
-to `run.googleapis.com` are rejected by the outbound proxy with HTTP CONNECT
-403 before reaching Google. The target project is configured, but its billing,
+files are empty JSON objects and the SDK has zero active accounts. The initial
+Google API probe was proxy-rejected (HTTP CONNECT 403). A later probe reached
+Google and returned **401 UNAUTHENTICATED / CREDENTIALS_MISSING**; network access
+to that API is now verified, authentication is still missing. The target project
+is configured, but its billing,
 permissions, APIs and resources cannot be verified with this access.
 
 Apply the saved environment network draft (Google APIs, Artifact Registry,
@@ -200,7 +202,7 @@ distributions are always distinguished from end-to-end cold latency.
 
 Current cloud results: **not measured**, URL/revision/digest unavailable.
 Warm p50/p95, throughput, cloud memory/error rate and cold-start latency are
-unavailable because Google credentials/network access are missing. The ignored
+unavailable because an authorized Google identity is missing. The ignored
 `outputs/milestone4/` receipts distinguish preparation, actual local verification
 and blocked cloud verification. No cloud capacity claim is made.
 

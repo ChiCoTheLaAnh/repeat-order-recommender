@@ -31,5 +31,6 @@ February 1 and validation selection labels end on May 1 (exclusive).
    retraining, drift alerts, event ingestion or additional infrastructure.
 
 The user supplied project `project-c0e2b13a-3cea-47e9-aad`, region `us-central1`.
-Google credentials currently injected are empty JSON objects and the running
-network policy denies Google APIs. Complete preparation while access is supplied.
+Google credentials currently injected are empty JSON objects. The initial
+network probe was denied; the latest reaches Google with 401 CREDENTIALS_MISSING.
+Complete preparation while an authorized identity is supplied.
