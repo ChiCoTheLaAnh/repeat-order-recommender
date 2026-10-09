@@ -1,0 +1,21 @@
+{
+  "version": "cloud_demo_v1",
+  "project": "project-c0e2b13a-3cea-47e9-aad",
+  "service": "repeat-order-historical-demo",
+  "region": "us-central1",
+  "repository": "repeat-order-demo",
+  "cpu": "1",
+  "memory": "1Gi",
+  "min_instances": 0,
+  "max_instances": 1,
+  "concurrency": 5,
+  "timeout_seconds": 30,
+  "billing": "request-based",
+  "runtime_account": "repeat-demo-runtime",
+  "deploy_account": "repeat-demo-deployer",
+  "github_repository": "ChiCoTheLaAnh/repeat-order-recommender",
+  "github_environment": "historical-demo",
+  "wif_pool": "github-repeat-demo",
+  "wif_provider": "github",
+  "load": {"seconds_per_level": 20, "requests_per_level": 250, "warmup_requests": 20, "concurrency": [1, 5], "k": 10}
+}

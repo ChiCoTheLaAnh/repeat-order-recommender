@@ -1,0 +1,7 @@
+{
+  "version": "logistic_artifact_v1",
+  "model_name": "logistic",
+  "joblib_sha256": "dd79f226da8964d6607185d6905829404ecd126dfaa65848d3bdc555f576f17d",
+  "feature_schema_sha256": "104ae78f3d094c66521714305d995c8f2f7098a11b5b2e863a6fc3e02fcd479a",
+  "model_labels_end_exclusive": "2011-02-01T00:00:00"
+}
