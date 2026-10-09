@@ -1340,11 +1340,20 @@ monitoring meanings, rollback and manual serving/model-update instructions.
 `cloud_verify.py` measures actual remote traffic separately from local tests.
 `Dockerfile.cloud` embeds the bundle without startup downloads or training.
 
-Cloud deployment is currently blocked: injected Google credentials are empty
-and the SDK has zero accounts. The latest Google API probe reached Google but
+Cloud deployment is currently blocked: Google credentials are unavailable
+and the SDK has zero accounts. The recorded M4 Google API probe reached Google but
 returned `401 CREDENTIALS_MISSING`; an earlier probe was proxy-blocked. The
 network configuration draft is saved for review/save and publishing; an
 authorized identity and project access are still required. **No live URL or cloud performance result
 is claimed.** May 1 remains valid because all training labels end February 1
 and validation selection ends May 1. The original test remains unopened and
 unevaluated; there is no further model tuning or automatic retraining.
+
+The October 9 authentication recheck found no Google ADC, zero SDK accounts,
+and no exposed Google sign-in tool. Browser login alone does not authenticate
+the Codex runner. [The numbered Cloud Shell deployment guide](docs/cloud-shell-deployment.md)
+uses Cloud Shell's separate authorization, the exact reviewed release commit,
+and a private transfer of the existing archive with its trusted checksums.
+It includes project/identity checks, keyless invocation, deployment and bounded
+remote verification commands. Git does not contain the fitted model or bundle;
+the guide preserves the original logistic weights and never invokes training.

@@ -30,18 +30,21 @@ before deserialization. A model update requires a reviewed new anchor/version.
 - Service access requires IAM authentication. Public access was not requested.
   The runtime account needs no application data/model access roles.
 
-Cloud deployment has **not run** in this workspace. The injected Google ADC
-files are empty JSON objects and the SDK has zero active accounts. The initial
+Cloud deployment has **not run** in this workspace. Initial M4 verification
+found empty injected Google ADC files and zero active SDK accounts. The initial
 Google API probe was proxy-rejected (HTTP CONNECT 403). A later probe reached
 Google and returned **401 UNAUTHENTICATED / CREDENTIALS_MISSING**; network access
 to that API is now verified, authentication is still missing. The target project
 is configured, but its billing,
 permissions, APIs and resources cannot be verified with this access.
 
-Apply the saved environment network draft (Google APIs, Artifact Registry,
-Cloud Run service domains and identity endpoints) and connect an authorized
-Google identity through the environment's credential facility. Do not paste
-keys/tokens into Git or chat. One-time setup needs permission to enable APIs,
+The October 9 recheck finds no Google ADC or SDK account and no Google account
+connector in the available environment tools. The earlier reference to an
+unspecified credential facility was not a usable authentication procedure.
+Browser Cloud Console login does not authenticate this process. Follow the
+numbered [Cloud Shell handoff](cloud-shell-deployment.md), using Cloud Shell's
+own authorization and the checksummed frozen bundle. Do not paste keys/tokens
+into Git or chat. One-time setup needs permission to enable APIs,
 create the repository/service accounts/WIF/custom role, bind IAM, configure log
 exclusions and create monitoring definitions, plus an enabled billing account.
 Those checks are currently blocked; no Google service-account key is created.
