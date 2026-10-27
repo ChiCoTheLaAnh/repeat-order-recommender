@@ -9,6 +9,49 @@ from fastapi.testclient import TestClient
 from tests import test_release_bundle as fixture
 
 
+class NativeMetricsTests(unittest.TestCase):
+    def test_monitoring_descriptor_names_keep_literal_slashes(self):
+        cloud=importlib.import_module('scripts.cloud_verify')
+        units={
+            'run.googleapis.com/container/startup_latencies':'ms',
+            'run.googleapis.com/container/memory/utilizations':'1',
+            'run.googleapis.com/request_latencies':'ms',
+            'run.googleapis.com/request_count':'1',
+        }
+        queried=[]
+        original=httpx.Client
+
+        def reply(request):
+            self.assertEqual(request.headers['Authorization'],'Bearer synthetic-access-token')
+            if '/metricDescriptors/' in request.url.path:
+                # Monitoring rejects percent-encoded slashes in metric names.
+                self.assertNotIn(b'%2f',request.url.raw_path.lower())
+                name=request.url.path.split('/metricDescriptors/',1)[1]
+                self.assertIn(name,units)
+                return httpx.Response(200,json={'name':'projects/demo/metricDescriptors/'+name,
+                                               'type':name,'unit':units[name]})
+            self.assertEqual(request.url.path,'/v3/projects/demo/timeSeries')
+            self.assertEqual(request.url.params['interval.startTime'],'2026-10-27T03:00:00Z')
+            self.assertEqual(request.url.params['interval.endTime'],'2026-10-27T03:20:00Z')
+            self.assertIn('resource.labels.revision_name="revision-1"',request.url.params['filter'])
+            queried.append(request.url.params['filter'])
+            return httpx.Response(200,json={})
+
+        def client(**kwargs):
+            return original(**kwargs,transport=httpx.MockTransport(reply))
+
+        with patch.object(cloud,'gcloud',return_value='synthetic-access-token'), \
+                patch.object(cloud.httpx,'Client',side_effect=client):
+            result=cloud.native_metrics('demo','us-central1','revision-1',
+                                       '2026-10-27T03:00:00Z','2026-10-27T03:20:00Z')
+        self.assertEqual(set(result),set(units))
+        self.assertEqual(len(queried),4)
+        for name,unit in units.items():
+            self.assertEqual(result[name]['unit'],unit)
+            self.assertEqual(result[name]['time_series'],[])
+            self.assertFalse(result[name]['more_pages'])
+
+
 class RemoteSmokeTests(fixture.ReleaseTests):
     def test_rollback_metrics_follow_traffic_not_latest_created_revision(self):
         cloud=importlib.import_module('scripts.cloud_verify')

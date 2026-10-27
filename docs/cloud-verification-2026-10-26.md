@@ -101,15 +101,22 @@ uptime 3.769 seconds. There was no preceding scale-to-zero observation, so
 nor the bundle-load duration is presented as confirmed end-to-end cold latency.
 
 Native metrics collection returned `unavailable: HTTPStatusError` with an empty
-metrics object. The report does not preserve its HTTP code, endpoint or Google
-error message. No native startup distribution, request-count distribution or
-container-memory sample is claimed. The problem could be a request/API/access
-error; export delay alone cannot explain an HTTP error without more evidence.
+metrics object. A subsequent Cloud Shell diagnostic established **HTTP 400**:
+`Invalid metric name: run.googleapis.com%2Fcontainer%2Fstartup_latencies`.
+The helper percent-encoded slashes in the metric descriptor path. The collector
+now preserves literal `/` separators; a regression test first reproduced the
+encoded request and then passed with the fix. This is a collector URL bug,
+not evidence of missing IAM permission. It does not change the deployed model,
+metric definitions, load policy or original run's results. Native startup,
+request-count and container-memory observations still require a successful
+follow-up collection; none are retroactively filled into this original report.
 
 ## Remaining work and release decision
 
-1. Capture the actual Monitoring HTTP status, endpoint and sanitized error
-   message, then collect native metrics. Do not grant more roles by guessing.
+1. Recollect native metrics with the corrected metric descriptor URL. The
+   original HTTP 400 has been diagnosed and fixed in the collector. Do not add
+   IAM roles to address this URL bug; read existing metrics without generating
+   new recommendation traffic, and diagnose any subsequent error separately.
 2. After all clients stop, attempt the separate zero-instance-evidenced cold
    experiment in the [Cloud Shell guide](cloud-shell-deployment.md). Missing
    instance-count samples remain unknown, not zero.

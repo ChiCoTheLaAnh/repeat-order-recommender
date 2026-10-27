@@ -117,7 +117,8 @@ def native_metrics(project,region,revision,start,end):
     with httpx.Client(headers={'Authorization':'Bearer '+access},verify=tls_context(),timeout=20) as client:
         for name in ['run.googleapis.com/container/startup_latencies','run.googleapis.com/container/memory/utilizations',
                      'run.googleapis.com/request_latencies','run.googleapis.com/request_count']:
-            descriptor=client.get(base+'/metricDescriptors/'+quote(name,safe=''))
+            # Monitoring requires literal path separators inside metric types.
+            descriptor=client.get(base+'/metricDescriptors/'+quote(name,safe='/'))
             descriptor.raise_for_status()
             filter_=f'metric.type="{name}" AND resource.labels.service_name="{config()["service"]}" AND resource.labels.location="{region}" AND resource.labels.revision_name="{revision}"'
             query=client.get(base+'/timeSeries',params={'filter':filter_,'interval.startTime':start,
