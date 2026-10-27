@@ -1348,10 +1348,11 @@ required). [The cloud verification report](docs/cloud-verification-2026-10-26.md
 records the exact image digest, runtime commit, hardware and measured results.
 Smoke checks passed. Warm all-attempt p95 was 20.300 / 27.125 ms at 1 / 5 clients;
 the five-client run had one unsuccessful attempt out of 250 (0.4%), so its
-combined latency/error gate failed. Process peak RSS was 515.273 MiB. Native
-metrics collection failed and cold-start latency remains unconfirmed; cloud
-verification is **partial**, not a clean operational pass. These short synthetic
-cloud measurements are separate from the local results above.
+combined latency/error gate failed. Process peak RSS was 515.273 MiB. The native
+collector's URL bug was fixed, and a follow-up collected startup, memory and
+request metrics; cold-start latency remains unconfirmed. Cloud verification is
+**partial**, not a clean operational pass. These short synthetic cloud
+measurements are separate from the local results above.
 
 May 1 remains valid because all training labels end February 1 and validation
 selection ends May 1. The original test remains unopened and unevaluated;

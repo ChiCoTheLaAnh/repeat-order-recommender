@@ -4,8 +4,9 @@ The historical demo was deployed and its API smoke checks passed from the
 user's authorized Google Cloud Shell. The frozen logistic model, cleaning,
 retrieval V1, features and label definitions are unchanged; the original test
 split remains unevaluated. Operational verification is **partial**: the
-five-client run contains one unsuccessful attempt, native Monitoring collection
-failed, and client-perceived cold-start latency is unconfirmed.
+five-client run contains one unsuccessful attempt and client-perceived
+cold-start latency is unconfirmed. Native Monitoring was successfully collected
+in a follow-up after fixing the original collector URL error.
 
 ## Evidence and release
 
@@ -107,23 +108,50 @@ The helper percent-encoded slashes in the metric descriptor path. The collector
 now preserves literal `/` separators; a regression test first reproduced the
 encoded request and then passed with the fix. This is a collector URL bug,
 not evidence of missing IAM permission. It does not change the deployed model,
-metric definitions, load policy or original run's results. Native startup,
-request-count and container-memory observations still require a successful
-follow-up collection; none are retroactively filled into this original report.
+metric definitions, load policy or original run's results. The subsequent native
+collection succeeded; its distinct observations are recorded below rather than
+retroactively replacing the original empty metrics object.
+
+## Native Monitoring follow-up
+
+The uploaded `cloudshell-native-followup.json` has SHA256
+`8df0170b430b072bb60f144063edc9bb35f8edc69027b7ecb3cc1911b5068e77`.
+Collector commit `b4860d87048f934696676553fb81110132d50481` was loaded into
+ignored operator files; the serving runtime remains `b4accd8`. The file matches
+the original project/region/revision. All four metric types were returned with
+no additional pages, and histogram bucket counts match their sample counts.
+The raw file is retained outside Git with the other receipts.
+
+The query covers `2026-10-27T02:45:09.263908Z` through
+`03:20:39.775825Z`: thirty minutes before the run through five minutes after it.
+It includes initial deployment, warmup, smoke and post-run observations, not
+only the 500 measured attempts. These aggregates cannot be split into the
+one-/five-client levels or substituted for client-side percentiles.
+
+| Native metric | Observed values | Interpretation and limits |
+| --- | --- | --- |
+| Container startup latency | Two nonempty samples: **20,138.401 ms** in the minute ending 02:59 UTC and **14,114.821 ms** in the minute ending 03:16 UTC | Native container startup; two observations are not a reliable percentile estimate or confirmed client cold latency. |
+| Container memory utilization | 21 nonempty one-sample distributions; values **7.373%–44.231%** of the configured limit; later samples ending 03:18–03:20 UTC are **41.783%** | Maximum observed sample, not an instantaneous peak or process RSS. Empty distributions were excluded rather than treated as zero. The 44.231% observations precede the load run; sampling does not capture the exact under-load peak. |
+| Request count | **550 HTTP 200**, **1 HTTP 422**, no returned 5xx series in this scoped window | Includes warmup/smoke/readiness. The 422 is consistent with the deliberate invalid-K smoke check. These totals do not classify the client's status-0 failure or prove the absence of all frontend errors. |
+| Request latency | The 200-response distribution has count **550**, mean **5.881 ms**; the 422 distribution has count **1**, mean **4.612 ms** | Native server-side aggregates, not the same request set or measurement boundary as client HTTP latency. |
+
+The 200 count agrees with the successful harness traffic: 499 measured
+responses, 40 warmups, the first request, eight successful smoke responses,
+and two readiness reads. Native metrics contain no per-request linkage; this
+agreement does not recover the exception class of the unsuccessful client
+attempt. The original five-client failed gate and unconfirmed cold-start
+classification remain unchanged. No new recommendation traffic was generated
+by collecting these native observations.
 
 ## Remaining work and release decision
 
-1. Recollect native metrics with the corrected metric descriptor URL. The
-   original HTTP 400 has been diagnosed and fixed in the collector. Do not add
-   IAM roles to address this URL bug; read existing metrics without generating
-   new recommendation traffic, and diagnose any subsequent error separately.
-2. After all clients stop, attempt the separate zero-instance-evidenced cold
+1. After all clients stop, attempt the separate zero-instance-evidenced cold
    experiment in the [Cloud Shell guide](cloud-shell-deployment.md). Missing
    instance-count samples remain unknown, not zero.
-3. Investigate the status-0 attempt. A subsequent bounded diagnostic run may
+2. Investigate the status-0 attempt. A subsequent bounded diagnostic run may
    record exception classes without URLs/customer IDs; retain this original
    failed-gate result and do not claim its cause from these aggregates alone.
-4. GitHub OIDC deployment and rollback have not been exercised by this manual
+3. GitHub OIDC deployment and rollback have not been exercised by this manual
    Cloud Shell run. The deployment receipt has no previous service to restore;
    this is the first recorded revision. Existing documented CI/rollback steps
    still require their own verification.

@@ -33,7 +33,8 @@ before deserialization. A model update requires a reviewed new anchor/version.
 The historical service was deployed and smoke-tested from the user's authorized
 Cloud Shell. [The dated cloud report](cloud-verification-2026-10-26.md) records
 the exact immutable image/revision and actual measurements, including one
-five-client failure, unconfirmed cold start and unavailable native metrics.
+five-client failure and unconfirmed cold start. Native metrics were collected
+in a follow-up after fixing a metric-descriptor URL encoding bug.
 Cloud verification is partial. The Codex runner still has no independent Google
 identity; uploaded Cloud Shell receipts were reviewed offline.
 
@@ -216,8 +217,11 @@ distributions are always distinguished from end-to-end cold latency.
 Actual cloud results are recorded in the [dated report](cloud-verification-2026-10-26.md).
 Warm p95 was 20.300 / 27.125 ms at 1 / 5 clients, with 0% / 0.4% unsuccessful
 attempts. The five-client helper gate failed because it requires both p95
-at most 250 ms and zero errors. Process peak RSS was 515.273 MiB; native metrics
-failed with an HTTP error and end-to-end cold latency is unconfirmed. These
+at most 250 ms and zero errors. Process peak RSS was 515.273 MiB. After the
+original collector HTTP 400 was fixed, native observations included two
+container startups (20.138 / 14.115 seconds) and memory utilization samples
+up to 44.231% over a broader window; these are not client cold latency or an
+instantaneous memory peak. End-to-end cold latency remains unconfirmed. These
 small closed-loop samples are not a capacity guarantee. Raw receipts remain
 ignored, and unavailable measurements are not replaced with local results.
 
