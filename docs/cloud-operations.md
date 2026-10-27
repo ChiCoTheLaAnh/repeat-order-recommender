@@ -30,13 +30,20 @@ before deserialization. A model update requires a reviewed new anchor/version.
 - Service access requires IAM authentication. Public access was not requested.
   The runtime account needs no application data/model access roles.
 
-Cloud deployment has **not run** in this workspace. Initial M4 verification
+The historical service was deployed and smoke-tested from the user's authorized
+Cloud Shell. [The dated cloud report](cloud-verification-2026-10-26.md) records
+the exact immutable image/revision and actual measurements, including one
+five-client failure, unconfirmed cold start and unavailable native metrics.
+Cloud verification is partial. The Codex runner still has no independent Google
+identity; uploaded Cloud Shell receipts were reviewed offline.
+
+Initially, M4 verification
 found empty injected Google ADC files and zero active SDK accounts. The initial
 Google API probe was proxy-rejected (HTTP CONNECT 403). A later probe reached
 Google and returned **401 UNAUTHENTICATED / CREDENTIALS_MISSING**; network access
-to that API is now verified, authentication is still missing. The target project
-is configured, but its billing,
-permissions, APIs and resources cannot be verified with this access.
+to that API was verified, while runner authentication remained missing. These
+were historical preparation blockers, subsequently resolved for deployment by
+using Cloud Shell's separately authorized identity.
 
 The October 9 recheck finds no Google ADC or SDK account and no Google account
 connector in the available environment tools. The earlier reference to an
@@ -47,7 +54,9 @@ own authorization and the checksummed frozen bundle. Do not paste keys/tokens
 into Git or chat. One-time setup needs permission to enable APIs,
 create the repository/service accounts/WIF/custom role, bind IAM, configure log
 exclusions and create monitoring definitions, plus an enabled billing account.
-Those checks are currently blocked; no Google service-account key is created.
+The manual Cloud Shell run completed bootstrap/deployment checks without a
+service-account key. Organization sink-read access required an administrator's
+custom role with only `logging.sinks.list` and `logging.sinks.get`.
 
 Install the pinned, SHA-verified SDK locally if it is absent:
 
@@ -135,8 +144,9 @@ configuration/dependencies, then deploys the digest and obtains a short-lived
 invoker token for health, readiness, metadata, known-customer equivalence and
 unknown fallback smoke checks. Receipts are uploaded without bundle contents,
 customer IDs or credentials. Generated OIDC credential files are Git/Docker
-ignored. Identity/resource setup and workflow execution remain unverified
-until Google access is available.
+ignored. The manual run completed resource/WIF setup, but did not exercise the
+GitHub OIDC deployment workflow. Do not infer a CI release/rollback pass from
+the separate Cloud Shell deployment.
 
 ## Monitoring and privacy
 
@@ -203,11 +213,13 @@ guarantee an instantaneous zero count. Without suitable evidence the first
 request is **unconfirmed**, and cold latency is null. Native container-startup
 distributions are always distinguished from end-to-end cold latency.
 
-Current cloud results: **not measured**, URL/revision/digest unavailable.
-Warm p50/p95, throughput, cloud memory/error rate and cold-start latency are
-unavailable because an authorized Google identity is missing. The ignored
-`outputs/milestone4/` receipts distinguish preparation, actual local verification
-and blocked cloud verification. No cloud capacity claim is made.
+Actual cloud results are recorded in the [dated report](cloud-verification-2026-10-26.md).
+Warm p95 was 20.300 / 27.125 ms at 1 / 5 clients, with 0% / 0.4% unsuccessful
+attempts. The five-client helper gate failed because it requires both p95
+at most 250 ms and zero errors. Process peak RSS was 515.273 MiB; native metrics
+failed with an HTTP error and end-to-end cold latency is unconfirmed. These
+small closed-loop samples are not a capacity guarantee. Raw receipts remain
+ignored, and unavailable measurements are not replaced with local results.
 
 ## Rollback
 

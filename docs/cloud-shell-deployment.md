@@ -20,8 +20,12 @@ when prompted, then verify the account and project below. No service-account
 key, pasted token, or chat authorization code is needed. Official references:
 [Cloud Shell authorization](https://cloud.google.com/shell/docs/auth) and
 [file upload/download](https://cloud.google.com/shell/docs/uploading-and-downloading-files).
-These pages were proxy-blocked from the current Codex runner; Cloud Shell steps
-remain unexecuted here. The local transfer/validation steps are verified.
+These pages were proxy-blocked from the original Codex runner. The user later
+completed deployment and bounded warm verification in authorized Cloud Shell;
+the uploaded receipts and remaining gaps are documented in the
+[October 26 cloud report](cloud-verification-2026-10-26.md). The runner did not
+obtain its own Google identity. Use the compatibility notes below when following
+the pinned historical checkout; no model replacement is required.
 
 The deployment checkout is deliberately pinned to **b4accd8**, the clean reviewed
 runtime commit used by the existing bundle, rather than the later documentation
@@ -158,6 +162,25 @@ failed check. Do not use shell tracing or print credentials.
    external prerequisites, not reasons to weaken privacy checks. Ancestor
    aggregated sinks, if present, require inspection/exclusions by their admin.
 
+   **Pinned-source compatibility:** commit `b4accd8` requests a WIF pool display
+   name longer than Google's 32-character limit. If bootstrap fails at that
+   creation, its API setup has already run. Create the same pool ID with the
+   shorter display name below, then repeat the bootstrap block. Run this only
+   after confirming the pool is absent; permission failures are not absence.
+
+    ```bash
+    gcloud iam workload-identity-pools create github-repeat-demo \
+      --location=global --project "$GCP_PROJECT_ID" \
+      --display-name="GitHub repeat-order demo" --quiet
+    ```
+
+   Organization Admin does not itself include sink-read or custom-role-create
+   permission. The observed organization administrator created a custom role
+   with only `logging.sinks.list,logging.sinks.get`. Grant ancestor sink-read
+   permission to the authorized operator and CI deployer as appropriate; remove
+   any temporary Organization Role Admin grant used to create that role. Verify
+   effective access instead of bypassing preflight.
+
     ```bash
     mkdir -p outputs/milestone4
     uv run --locked python -m scripts.bootstrap_cloud --apply \
@@ -197,6 +220,18 @@ failed check. Do not use shell tracing or print credentials.
    rollback. Configuration stays request billing, 1 vCPU/1 GiB, 0–1 instances,
    concurrency 5 and startup/liveness probes; IAM authentication stays enabled.
 
+   In the recorded run, Docker and Skopeo initially failed to connect while
+   Python/curl could connect. The successful transfer used Skopeo 1.13.3 through
+   a loopback-only Tinyproxy 1.11.1 CONNECT tunnel, with the `pull,push` registry
+   token obtained directly by Python and supplied using `--dest-registry-token`.
+   TLS verification stayed enabled; tokens were not printed or saved in Git,
+   and the proxy was stopped on exit. This was an operator transport workaround,
+   not a different deployment architecture or a model rebuild. It does not prove
+   the underlying intermittent connection cause. Failed partial layer uploads
+   were not considered a complete image: a successful manifest write and the
+   registry digest were required. Use the exact digest in the dated report for
+   the recorded release; never substitute an unverified local image ID.
+
     ```bash
     gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
     docker push "$repeat_image_tag"
@@ -229,7 +264,7 @@ failed check. Do not use shell tracing or print credentials.
     esac
     gcloud iam service-accounts add-iam-policy-binding "$repeat_deployer" \
       --project "$GCP_PROJECT_ID" --member "$repeat_invoker_member" \
-      --role roles/iam.serviceAccountTokenCreator --quiet >/dev/null
+      --role roles/iam.serviceAccountTokenCreator --condition=None --quiet >/dev/null
     repeat_id_token="$(gcloud auth print-identity-token \
       --impersonate-service-account "$repeat_deployer" \
       --audiences "$repeat_cloud_url" --include-email)"
@@ -238,11 +273,17 @@ failed check. Do not use shell tracing or print credentials.
     unset repeat_id_token
     ```
 
+    If a newly granted binding still yields `getAccessToken` permission errors,
+    inspect that account's actual IAM policy/member/condition and allow for IAM
+    propagation. The observed unconditional binding subsequently worked. Do not
+    repeatedly add broader roles or print tokens while diagnosing it.
+
 10. Run actual remote smoke and bounded warm measurements. This covers health,
     readiness, release metadata, known-customer offline/API equivalence,
     unknown fallback and K validation, then 1/5-client levels (20 warmup,
     at most 250 measured requests or 20 seconds each). It records latency,
-    throughput, errors, process RSS and native memory/startup distributions.
+    throughput, errors and process RSS, and attempts to collect native
+    memory/startup distributions. HTTP failures remain unavailable, not zero.
     The first request alone is explicitly **not** a confirmed cold-start sample.
     Save client hardware separately; Cloud Run does not disclose its host CPU
     model. Report Cloud Shell client measurements as cloud HTTP, not local
@@ -250,9 +291,31 @@ failed check. Do not use shell tracing or print credentials.
     remain unavailable; export can lag minutes.
 
     ```bash
-    uv run --locked python -c \
-      "import json; from scripts.model_selection import hardware; print(json.dumps(hardware(),indent=2))" \
-      > outputs/milestone4/cloudshell-client-hardware.json
+    python3 - <<'PY'
+    import json, os, platform
+    from pathlib import Path
+    def read(path):
+        try:
+            return Path(path).read_text().strip()
+        except OSError:
+            return None
+    cpu=next((line.split(':',1)[1].strip()
+              for line in (read('/proc/cpuinfo') or '').splitlines()
+              if line.startswith('model name')),None)
+    report={'measurement_client':'Google Cloud Shell',
+            'platform':platform.platform(),'python':platform.python_version(),
+            'cpu':cpu,'logical_cpus':os.cpu_count(),
+            'affinity_cpus':len(os.sched_getaffinity(0)),
+            'cgroup_files_observed':{path:read(path) for path in [
+                '/sys/fs/cgroup/cpu.max','/sys/fs/cgroup/memory.max',
+                '/sys/fs/cgroup/cpu/cpu.cfs_quota_us',
+                '/sys/fs/cgroup/cpu/cpu.cfs_period_us',
+                '/sys/fs/cgroup/memory/memory.limit_in_bytes']},
+            'note':'Client information only. Missing limits are unknown; not Cloud Run server hardware.'}
+    p=Path('outputs/milestone4/cloudshell-client-hardware.json')
+    p.parent.mkdir(parents=True,exist_ok=True)
+    p.write_text(json.dumps(report,indent=2))
+    PY
     uv run --locked python -m scripts.cloud_verify \
       --url "$repeat_cloud_url" --bundle "$REPEAT_BUNDLE" \
       --project "$GCP_PROJECT_ID" --region "$GCP_REGION" \

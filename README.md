@@ -1272,9 +1272,11 @@ New files are intentionally separate from the frozen pipeline:
 This is a historical local demonstrator. Unknown/ineligible-customer fallback
 has no personalized quality estimate, and validation selection is retrospective.
 The no-purchase primary-metric exclusion, discovery limitations, observed-data
-coverage assumptions and unresolved-code policy remain unchanged. No cloud
-service, production rollout, event ingestion, hosted tracking or monitoring
-infrastructure is set up. The test split remains unevaluated.
+coverage assumptions and unresolved-code policy remain unchanged. At Milestone
+3, no cloud service or monitoring infrastructure had been set up; the separate
+Milestone 4 section below records the later cloud deployment. Event ingestion,
+hosted tracking and a production rollout are outside this demonstrator. The
+test split remains unevaluated.
 
 ### Recorded local verification results
 
@@ -1314,7 +1316,7 @@ versions; strict third-party deprecation-free execution is not claimed.
 Raw, cleaning, snapshot, retrieval and all M2 artifact/source/config hashes
 remain unchanged. There were no additional fits or test quality evaluations.
 
-## Milestone 4: reproducible cloud release preparation
+## Milestone 4: historical cloud release
 
 The target is **project-c0e2b13a-3cea-47e9-aad / us-central1**, using the frozen
 logistic model and a baked-in immutable bundle. Cloud Run configuration uses
@@ -1340,20 +1342,28 @@ monitoring meanings, rollback and manual serving/model-update instructions.
 `cloud_verify.py` measures actual remote traffic separately from local tests.
 `Dockerfile.cloud` embeds the bundle without startup downloads or training.
 
-Cloud deployment is currently blocked: Google credentials are unavailable
-and the SDK has zero accounts. The recorded M4 Google API probe reached Google but
-returned `401 CREDENTIALS_MISSING`; an earlier probe was proxy-blocked. The
-network configuration draft is saved for review/save and publishing; an
-authorized identity and project access are still required. **No live URL or cloud performance result
-is claimed.** May 1 remains valid because all training labels end February 1
-and validation selection ends May 1. The original test remains unopened and
-unevaluated; there is no further model tuning or automatic retraining.
+The demo was deployed from authorized Cloud Shell to
+<https://repeat-order-historical-demo-yqfhlbro6a-uc.a.run.app> (IAM authentication
+required). [The cloud verification report](docs/cloud-verification-2026-10-26.md)
+records the exact image digest, runtime commit, hardware and measured results.
+Smoke checks passed. Warm all-attempt p95 was 20.300 / 27.125 ms at 1 / 5 clients;
+the five-client run had one unsuccessful attempt out of 250 (0.4%), so its
+combined latency/error gate failed. Process peak RSS was 515.273 MiB. Native
+metrics collection failed and cold-start latency remains unconfirmed; cloud
+verification is **partial**, not a clean operational pass. These short synthetic
+cloud measurements are separate from the local results above.
+
+May 1 remains valid because all training labels end February 1 and validation
+selection ends May 1. The original test remains unopened and unevaluated;
+there is no further model tuning or automatic retraining.
 
 The October 9 authentication recheck found no Google ADC, zero SDK accounts,
 and no exposed Google sign-in tool. Browser login alone does not authenticate
 the Codex runner. [The numbered Cloud Shell deployment guide](docs/cloud-shell-deployment.md)
 uses Cloud Shell's separate authorization, the exact reviewed release commit,
 and a private transfer of the existing archive with its trusted checksums.
-It includes project/identity checks, keyless invocation, deployment and bounded
+The successful deployment and measurements ran in the user's authorized Cloud
+Shell; browser authorization did not authenticate the Codex runner. The guide
+includes project/identity checks, keyless invocation, deployment and bounded
 remote verification commands. Git does not contain the fitted model or bundle;
 the guide preserves the original logistic weights and never invokes training.
