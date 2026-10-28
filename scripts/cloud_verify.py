@@ -76,6 +76,7 @@ def serving_revision(state):
 
 async def warm_level(url,headers,customers,concurrency,load):
     latencies,statuses,modes=[],[],[]
+    failures=Counter()
     ids=set();sequence=count()
     limits=httpx.Limits(max_connections=concurrency,max_keepalive_connections=concurrency)
     async with httpx.AsyncClient(base_url=url,headers=headers,verify=tls_context(),timeout=30,limits=limits) as client:
@@ -96,12 +97,30 @@ async def warm_level(url,headers,customers,concurrency,load):
                     ids.add(result.headers.get('X-Instance-Start-Id','unavailable'))
                     if status==200:
                         body=result.json()
-                        if body['recommendation_mode']!=expected or len(body['items'])!=load['k']:status=-1
-                except (httpx.HTTPError,ValueError,KeyError):status=0
+                        if body['recommendation_mode']!=expected or len(body['items'])!=load['k']:
+                            status=-1
+                            failures['response_contract_mismatch']+=1
+                    else:failures['http_status:'+str(status)]+=1
+                except httpx.HTTPError as error:
+                    status=0
+                    # Only a library-defined class name: never exception text/URL/body.
+                    name=next(cls.__name__ for cls in type(error).__mro__
+                              if cls.__module__=='httpx')
+                    failures['transport:'+name]+=1
+                except KeyError:
+                    status=0
+                    failures['response_schema:KeyError']+=1
+                except TypeError:
+                    status=0
+                    failures['response_schema:TypeError']+=1
+                except ValueError as error:
+                    status=0
+                    name='JSONDecodeError' if isinstance(error,json.JSONDecodeError) else 'ValueError'
+                    failures['response_parse:'+name]+=1
                 latencies.append(1000*(time.perf_counter()-before));statuses.append(status);modes.append(expected)
         await asyncio.gather(*(worker() for _ in range(concurrency)))
         result=summarize(latencies,statuses,time.perf_counter()-started)
-        result.update({'concurrency':concurrency,'attempted_mode_counts':dict(Counter(modes)),
+        result.update({'concurrency':concurrency,'failure_counts':dict(sorted(failures.items())),'attempted_mode_counts':dict(Counter(modes)),
             'instance_start_ids_seen':sorted(ids),'scope':'remote Cloud Run HTTP; includes client networking/TLS',
             'requests_cap':load['requests_per_level'],'duration_cap_seconds':load['seconds_per_level']})
         p95=result['latency_all_attempts']['p95_ms'] if result['latency_all_attempts'] else float('inf')
