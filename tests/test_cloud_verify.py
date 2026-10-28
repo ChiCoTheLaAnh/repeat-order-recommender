@@ -108,3 +108,31 @@ class RemoteSmokeTests(fixture.ReleaseTests):
 
 if __name__=='__main__':
     unittest.main()
+
+
+class WarmDiagnosticsTests(unittest.TestCase):
+    def test_failure_categories_omit_sensitive_details_and_keep_gate(self):
+        cloud=importlib.import_module('scripts.cloud_verify')
+        original=httpx.AsyncClient
+        calls=iter(['timeout','json','key','mismatch','server','ok'])
+        def reply(request):
+            outcome=next(calls)
+            if outcome=='timeout':
+                raise httpx.ReadTimeout('SECRET customer/token URL',request=request)
+            if outcome=='json':return httpx.Response(200,text='SECRET invalid JSON')
+            if outcome=='key':return httpx.Response(200,json={'SECRET':'private'})
+            if outcome=='server':return httpx.Response(503,text='SECRET server error')
+            return httpx.Response(200,json={'recommendation_mode':
+                'wrong' if outcome=='mismatch' else 'personalized','items':[{}]})
+        def client(**kwargs):
+            return original(**kwargs,transport=httpx.MockTransport(reply))
+        with patch.object(cloud.httpx,'AsyncClient',side_effect=client):
+            result=asyncio.run(cloud.warm_level('https://example.invalid',{},['PRIVATE_ID'],1,
+                {'warmup_requests':0,'k':1,'seconds_per_level':10,'requests_per_level':6}))
+        self.assertEqual(result['failure_counts'],{'transport:ReadTimeout':1,
+            'response_parse:JSONDecodeError':1,'response_schema:KeyError':1,
+            'response_contract_mismatch':1,'http_status:503':1})
+        self.assertEqual(result['status_counts'],{'0':3,'-1':1,'503':1,'200':1})
+        self.assertFalse(result['warm_p95_target_met'])
+        self.assertNotIn('SECRET',str(result))
+        self.assertNotIn('PRIVATE_ID',str(result))
