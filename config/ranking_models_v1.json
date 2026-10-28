@@ -1,0 +1,26 @@
+{
+  "version": "milestone2_initial",
+  "seed": 42,
+  "threads": 4,
+  "retrieval_policy_sha256": "684d5b1ba2660fe7f2fe60c1e0da55688c3c059ef436bcf6deb4fa506789aac1",
+  "training": "All retrieved candidates at all training cutoffs. No negative sampling, no class balancing. Each nonempty customer-month query has total row weight 1; zero-purchase queries remain all-negative examples.",
+  "logistic": {"C": 1.0, "solver": "lbfgs", "max_iter": 400, "tol": 0.00001},
+  "xgboost_common": {
+    "objective": "binary:logistic", "tree_method": "hist", "device": "cpu", "max_bin": 128,
+    "subsample": 1.0, "colsample_bytree": 1.0, "scale_pos_weight": 1.0
+  },
+  "xgboost_configs": [
+    {"name": "xgb_shallow", "max_depth": 3, "n_estimators": 200, "learning_rate": 0.08, "min_child_weight": 1.0, "reg_lambda": 1.0},
+    {"name": "xgb_depth5", "max_depth": 5, "n_estimators": 300, "learning_rate": 0.05, "min_child_weight": 1.0, "reg_lambda": 5.0},
+    {"name": "xgb_regularized", "max_depth": 4, "n_estimators": 300, "learning_rate": 0.05, "min_child_weight": 2.0, "reg_lambda": 10.0}
+  ],
+  "selection": "Choose highest pooled validation query-macro NDCG@10; ties use configuration order. Fit training only, fixed iteration counts, no early stopping or random row splits. At most these three predefined XGBoost fits.",
+  "scores": "Logistic decision_function and XGBoost raw margins are ranking scores, not calibrated purchase probabilities. Descending score, ascending normalized SKU resolves ties.",
+  "frequency_segments": {"sparse_2_3": [2, 3], "moderate_4_9": [4, 9], "frequent_10_plus": [10, null]},
+  "recency_segments": {"recent_0_30": [0, 30], "active_30_90": [30, 90], "stale_90_180": [90, 180]},
+  "segment_boundaries": "Frequency uses lifetime distinct purchase invoices from snapshots; inclusive integer bounds. Recency uses lifetime last-purchase age: first bin [0,30], then (30,90], then (90,180].",
+  "score_batch_rows": 100000,
+  "bootstrap": {"replicates": 2000, "confidence": 0.95, "seed": 42, "unit": "identified customer cluster", "statistic": "Pooled primary-query mean paired NDCG@10 difference; resample customers with replacement and retain every primary query for each drawn customer."},
+  "advance": {"minimum_absolute_ndcg_gain": 0.01, "minimum_ci_lower": 0.0, "maximum_absolute_recall_loss": 0.01, "scope": "Validation-only advancement recommendation; interval is descriptive and selection uses the same validation data. No test evaluation or deployment."},
+  "tracking": "Structured local JSON manifests; no hosted tracking service. Test partitions and paid rows at/after 2011-05-01 are not loaded."
+}

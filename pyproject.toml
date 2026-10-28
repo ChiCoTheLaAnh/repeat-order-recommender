@@ -7,6 +7,13 @@ dependencies = [
     "pandas==2.3.3",
     "openpyxl==3.1.5",
     "pyarrow==21.0.0",
+    "scipy==1.15.3",
+    "scikit-learn==1.7.2",
+    "xgboost-cpu==3.0.5",
+    "joblib==1.5.2",
+    "fastapi==0.115.12",
+    "uvicorn==0.34.2",
+    "httpx==0.28.1",
 ]
 
 [tool.uv]

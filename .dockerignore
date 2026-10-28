@@ -1,0 +1,9 @@
+.git
+.venv
+.cache
+data
+outputs
+tests
+**/__pycache__
+*.log
+gha-creds-*.json

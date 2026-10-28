@@ -1,0 +1,14 @@
+ARG SERVICE_IMAGE=repeat-order-recommender:milestone3
+FROM ${SERVICE_IMAGE}
+ARG SOURCE_COMMIT
+ARG RELEASE_ID
+ARG BUNDLE_MANIFEST_SHA256
+LABEL org.opencontainers.image.title="Historical repeat-order recommendation demo" \
+      org.opencontainers.image.revision=${SOURCE_COMMIT} \
+      io.repeat-order.release=${RELEASE_ID} \
+      io.repeat-order.bundle-manifest-sha256=${BUNDLE_MANIFEST_SHA256}
+COPY bundle /bundle
+# The base image carries the runtime sources; this file is also source-verified.
+COPY --chmod=644 Dockerfile /app/Dockerfile.cloud
+ENV BUNDLE_PATH=/bundle PORT=8080
+# No downloads, feature generation, or model fits during startup.

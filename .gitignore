@@ -222,3 +222,6 @@ __marimo__/
 # Downloaded datasets and generated audit reports
 /data/
 /outputs/
+
+# Ephemeral GitHub OIDC credentials (never service-account keys).
+gha-creds-*.json
