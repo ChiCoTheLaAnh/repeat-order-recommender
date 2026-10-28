@@ -143,11 +143,29 @@ attempt. The original five-client failed gate and unconfirmed cold-start
 classification remain unchanged. No new recommendation traffic was generated
 by collecting these native observations.
 
+## Guarded cold-start attempt
+
+A later user-run check stopped with:
+
+```text
+No explicit fresh zero evidence. Cold remains unconfirmed; no request sent.
+```
+
+The guard did not send a recommendation request. The supplied output does not
+include the individual instance-count observations, so it cannot distinguish
+missing observations from nonzero instances. Neither case establishes fresh
+scale-to-zero evidence. Confirmed client cold latency remains null; the original
+first-request timing and warm results are unchanged. Closing Cloud Shell after
+this check does not stop the independently deployed Cloud Run service and is
+not evidence that its instances have scaled to zero.
+
 ## Remaining work and release decision
 
-1. After all clients stop, attempt the separate zero-instance-evidenced cold
-   experiment in the [Cloud Shell guide](cloud-shell-deployment.md). Missing
-   instance-count samples remain unknown, not zero.
+1. Cold-start verification remains open after the guarded attempt above. If
+   resumed, use the separate zero-instance-evidenced experiment in the
+   [Cloud Shell guide](cloud-shell-deployment.md) after all clients stop. Missing
+   instance-count samples remain unknown, not zero; do not redeploy merely to
+   repeat the measurement.
 2. Investigate the status-0 attempt. A subsequent bounded diagnostic run may
    record exception classes without URLs/customer IDs; retain this original
    failed-gate result and do not claim its cause from these aggregates alone.
