@@ -1,6 +1,9 @@
 """Clean-commit historical releases, immutable image deployment and privacy preflight."""
 import argparse
 import gzip
+import importlib
+import importlib.machinery
+import io
 import json
 import os
 from pathlib import Path
@@ -9,6 +12,10 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
+import sys
+import types
+import uuid
+import weakref
 
 import pandas as pd
 
@@ -17,6 +24,7 @@ from .release_bundle import ReleaseBundle
 
 CONFIG_PATH=ROOT/'config/cloud_demo_v1.json'
 PRIVACY_EXCLUSION='historical-demo-request-privacy'
+APPROVED_RELEASE_PATH=ROOT/'config/approved_cloud_release_v1.json'
 
 
 def config():
@@ -57,6 +65,71 @@ def validate_deployable_manifest(manifest,expected_commit):
     if (manifest['files']['policies/ranking_features_v1.json']['sha256']!=reference['feature_schema_sha256']
         or p['model_labels_end_exclusive']!=reference['model_labels_end_exclusive']):
         raise ValueError('Selected logistic feature schema or training-label boundary changed')
+
+
+def approved_release(bundle_path,image):
+    """Bind an older artifact to reviewed hashes before any model deserialization.
+
+    Approval is committed configuration, not a caller-provided source bypass.
+    The deployment operator's clean commit is recorded independently.
+    """
+    record=json.loads(APPROVED_RELEASE_PATH.read_text())
+    if record.get('version')!='approved_cloud_release_v1':
+        raise ValueError('Unsupported release approval version')
+    if image!=record['image_digest']:
+        raise ValueError('Image differs from reviewed release approval')
+    if sha256(Path(bundle_path)/'manifest.json')!=record['manifest_sha256']:
+        raise ValueError('Manifest differs from reviewed release approval')
+    manifest=json.loads((Path(bundle_path)/'manifest.json').read_text())
+    validate_deployable_manifest(manifest,record['artifact_source_commit'])
+    if any(manifest[key]!=record[key] for key in ['release_id','model_version']):
+        raise ValueError('Release identity differs from reviewed approval')
+    return {**record,'approval_sha256':sha256(APPROVED_RELEASE_PATH)}
+
+
+def load_approved_bundle(bundle_path,image):
+    """Use the exact committed artifact loader, leaving serving guards unchanged.
+
+    The model is loaded only after reviewed approval and a byte-for-byte match
+    between bundled source payloads and the local Git object's source tree.
+    No bundled Python is executed directly from an unverified archive.
+    """
+    approval=approved_release(bundle_path,image)
+    source=approval['artifact_source_commit']
+    temporary=tempfile.TemporaryDirectory(prefix='approved-release-source-')
+    root=Path(temporary.name)
+    try:
+        archive=subprocess.check_output(['git','archive',source],cwd=ROOT)
+        with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
+            for member in tar.getmembers():
+                path=Path(member.name)
+                if path.is_absolute() or '..' in path.parts or not (member.isfile() or member.isdir()):
+                    raise ValueError('Unsafe committed source archive')
+            tar.extractall(root,filter='data')
+        manifest=json.loads((Path(bundle_path)/'manifest.json').read_text())
+        for name,expected in manifest['files'].items():
+            if name.startswith('code/'):
+                relative=Path(name[5:])
+                if relative.is_absolute() or '..' in relative.parts:
+                    raise ValueError('Unsafe committed source path')
+                path=root/relative
+                if not path.is_file() or sha256(path)!=expected['sha256']:
+                    raise ValueError('Artifact code differs from committed source')
+        # A unique namespace keeps operator and artifact module globals separate.
+        namespace='_approved_release_'+uuid.uuid4().hex
+        package=types.ModuleType(namespace)
+        package.__path__=[str(root/'scripts')]
+        package.__spec__=importlib.machinery.ModuleSpec(namespace,loader=None,is_package=True)
+        sys.modules[namespace]=package
+        loader=importlib.import_module(namespace+'.release_bundle')
+        bundle=loader.ReleaseBundle.load(Path(bundle_path).resolve())
+        # Retain source paths for the lifetime of the scored bundle.
+        bundle._operator_source_directory=temporary
+        weakref.finalize(bundle,temporary.cleanup)
+        return bundle
+    except Exception:
+        temporary.cleanup()
+        raise
 
 
 def request_log_filter():
@@ -226,7 +299,7 @@ def validate_image_labels(labels,manifest,manifest_sha):
         raise ValueError('Image OCI provenance labels do not match the supplied release')
 
 
-def verify_image_bundle(image,bundle_path):
+def verify_image_bundle(image,bundle_path,artifact_source_commit=None):
     """Pull an immutable image and inspect its files without executing it."""
     env=os.environ.copy()
     docker_config=Path(env.get('DOCKER_CONFIG',Path.home()/'.docker'))
@@ -247,20 +320,25 @@ def verify_image_bundle(image,bundle_path):
             docker('cp',container+':/bundle',extracted)
             if sha256(extracted/'manifest.json')!=digest:
                 raise ValueError('Image contains a different bundle manifest')
-            validate_deployable_manifest(json.loads((extracted/'manifest.json').read_text()),clean_commit())
-            ReleaseBundle.load(extracted)
+            validate_deployable_manifest(json.loads((extracted/'manifest.json').read_text()),
+                artifact_source_commit or clean_commit())
+            if artifact_source_commit:
+                load_approved_bundle(extracted,image)
+            else:ReleaseBundle.load(extracted)
     finally:
         docker('rm',container)
     return {'image_id':inspected['Id'],'bundle_manifest_sha256':digest,'verified_without_execution':True}
 
 
 def deploy(bundle_path,image,project,region,output):
-    bundle=ReleaseBundle.load(bundle_path)
-    validate_deployable_manifest(bundle.manifest,clean_commit())
+    operator_commit=clean_commit()
+    approval=approved_release(bundle_path,image)
+    bundle=load_approved_bundle(bundle_path,image)
     # This MUST precede service creation and every smoke/load request.
     log_privacy=privacy_preflight(project)
     spec=service_spec(project,region,image,bundle.manifest)
-    image_verification=verify_image_bundle(image,bundle_path)
+    spec['spec']['template']['metadata']['labels']['operator-commit']=operator_commit
+    image_verification=verify_image_bundle(image,bundle_path,approval['artifact_source_commit'])
     output=Path(output);output.mkdir(parents=True,exist_ok=True)
     spec_path=output/'cloud_run_service.json';spec_path.write_text(json.dumps(spec,indent=2)+'\n')
     previous=None
@@ -280,11 +358,48 @@ def deploy(bundle_path,image,project,region,output):
     record={'project':project,'region':region,'service':config()['service'],'image_digest':image,
         'release_id':bundle.manifest['release_id'],'model_version':bundle.manifest['model_version'],
         'code_commit':bundle.manifest['provenance']['code_commit'],'manifest_sha256':sha256(Path(bundle_path)/'manifest.json'),
+        'operator_code_commit':operator_commit,'approved_release':approval,
         'previous_service':previous,'service_state':current,'url':current['status']['url'],
         'image_verification':image_verification,
         'log_privacy':log_privacy,
         'configuration':spec,'access':'IAM authenticated; not public','test_evaluated':False}
     (output/'deployment.json').write_text(json.dumps(record,indent=2)+'\n')
+    return record
+
+
+def rollback(receipt_path,output):
+    """Restore captured traffic only to the reviewed frozen image, never a tag."""
+    from .cloud_verify import serving_revision
+    receipt=json.loads(Path(receipt_path).read_text())
+    previous=receipt.get('previous_service')
+    if not previous:raise ValueError('No previous service captured; rollback is unavailable')
+    target=serving_revision(previous)
+    c=config()
+    if any(receipt[key]!=c[key] for key in ['project','region','service']):
+        raise ValueError('Rollback receipt does not match configured demo')
+    approval=json.loads(APPROVED_RELEASE_PATH.read_text())
+    operator=clean_commit()
+    privacy=privacy_preflight(c['project'])
+    revision=gcloud('run','revisions','describe',target,'--project',c['project'],
+                    '--region',c['region'],json_output=True)
+    if (revision['spec']['containers'][0]['image']!=approval['image_digest']
+        or revision['metadata'].get('labels',{}).get('source-commit')!=approval['artifact_source_commit']):
+        raise ValueError('Rollback target is not the approved immutable release')
+    before=gcloud('run','services','describe',c['service'],'--project',c['project'],
+                  '--region',c['region'],json_output=True)
+    prior=serving_revision(before)
+    gcloud('run','services','update-traffic',c['service'],'--to-revisions',target+'=100',
+           '--project',c['project'],'--region',c['region'])
+    after=gcloud('run','services','describe',c['service'],'--project',c['project'],
+                 '--region',c['region'],json_output=True)
+    if serving_revision(after)!=target:raise ValueError('Rollback traffic was not restored')
+    record={'project':c['project'],'region':c['region'],'service':c['service'],
+        'restored_revision':target,'previous_serving_revision':prior,'changed_traffic':prior!=target,
+        'image_digest':approval['image_digest'],'operator_code_commit':operator,
+        'approval_sha256':sha256(APPROVED_RELEASE_PATH),'deployment_receipt_sha256':sha256(receipt_path),
+        'log_privacy':privacy,'service_state':after,'smoke_verified':False,'test_evaluated':False}
+    output=Path(output);output.mkdir(parents=True,exist_ok=True)
+    (output/'rollback.json').write_text(json.dumps(record,indent=2)+'\n')
     return record
 
 
@@ -296,8 +411,12 @@ def main():
     context=sub.add_parser('context');context.add_argument('--bundle',type=Path,required=True);context.add_argument('--output',type=Path,required=True)
     render=sub.add_parser('render');render.add_argument('--bundle',type=Path,required=True);render.add_argument('--image',required=True);render.add_argument('--project',default=config()['project']);render.add_argument('--region',default=config()['region']);render.add_argument('--output',type=Path,default=ROOT/'outputs/milestone4/cloud_run_service.json')
     publish=sub.add_parser('deploy');publish.add_argument('--bundle',type=Path,required=True);publish.add_argument('--image',required=True);publish.add_argument('--project',default=config()['project']);publish.add_argument('--region',default=config()['region']);publish.add_argument('--output',type=Path,default=ROOT/'outputs/milestone4')
+    restore=sub.add_parser('rollback');restore.add_argument('--receipt',type=Path,required=True);restore.add_argument('--output',type=Path,required=True)
+    check=sub.add_parser('verify-release');check.add_argument('--bundle',type=Path,required=True);check.add_argument('--image',required=True)
     args=parser.parse_args()
-    if args.command=='package': result=package_bundle(args.bundle,args.output)
+    if args.command=='rollback': result=rollback(args.receipt,args.output)
+    elif args.command=='verify-release': result=approved_release(args.bundle,args.image)
+    elif args.command=='package': result=package_bundle(args.bundle,args.output)
     elif args.command=='extract': result={'bundle':str(extract_bundle(args.archive,args.output,args.sha256))}
     elif args.command=='context': result={'context':str(prepare_context(args.bundle,args.output))}
     elif args.command=='render':

@@ -1,4 +1,5 @@
 import importlib
+import json
 import asyncio
 from pathlib import Path
 import unittest
@@ -7,6 +8,15 @@ import httpx
 from fastapi.testclient import TestClient
 
 from tests import test_release_bundle as fixture
+
+
+def valid_response(mode,k):
+    return {'recommendation_mode':mode,
+        'items':[{'item_id':str(i),'ranking_score':1.,'description':None} for i in range(k)],
+        'model_version':'logistic_fixed','release_version':'release_fixed',
+        'data_as_of':'2011-05-01T00:00:00','score_kind':
+            'distinct_identified_purchasers_30d' if mode=='popularity_fallback' else 'raw_model_margin',
+        'scores_are_calibrated_probabilities':False}
 
 
 class NativeMetricsTests(unittest.TestCase):
@@ -93,7 +103,7 @@ class RemoteSmokeTests(fixture.ReleaseTests):
         original=httpx.AsyncClient
         def reply(request):
             mode='popularity_fallback' if 'unknown-cloud-load' in request.url.path else 'personalized'
-            return httpx.Response(200,json={'recommendation_mode':mode,'items':[{}, {}, {}]},
+            return httpx.Response(200,json=valid_response(mode,3),
                                   headers={'X-Instance-Start-Id':'synthetic'},request=request)
         def client(**kwargs):
             return original(**kwargs,transport=httpx.MockTransport(reply))
@@ -108,3 +118,71 @@ class RemoteSmokeTests(fixture.ReleaseTests):
 
 if __name__=='__main__':
     unittest.main()
+
+
+class WarmDiagnosticsTests(unittest.TestCase):
+    def test_failure_categories_omit_sensitive_details_and_keep_gate(self):
+        cloud=importlib.import_module('scripts.cloud_verify')
+        original=httpx.AsyncClient
+        calls=iter(['timeout','json','key','mismatch','server','ok'])
+        def reply(request):
+            outcome=next(calls)
+            if outcome=='timeout':
+                raise httpx.ReadTimeout('SECRET customer/token URL',request=request)
+            if outcome=='json':return httpx.Response(200,text='SECRET invalid JSON')
+            if outcome=='key':return httpx.Response(200,json={'SECRET':'private'})
+            if outcome=='server':return httpx.Response(503,text='SECRET server error')
+            return httpx.Response(200,json=valid_response('wrong' if outcome=='mismatch' else 'personalized',1))
+        def client(**kwargs):
+            return original(**kwargs,transport=httpx.MockTransport(reply))
+        with patch.object(cloud.httpx,'AsyncClient',side_effect=client):
+            result=asyncio.run(cloud.warm_level('https://example.invalid',{},['PRIVATE_ID'],1,
+                {'warmup_requests':0,'k':1,'seconds_per_level':10,'requests_per_level':6}))
+        self.assertEqual(result['failure_counts'],{'transport:ReadTimeout':1,
+            'response_parse:JSONDecodeError':1,'response_schema:KeyError':1,
+            'response_contract_mismatch':1,'http_status:503':1})
+        self.assertEqual(result['status_counts'],{'0':3,'-1':1,'503':1,'200':1})
+        self.assertFalse(result['warm_p95_target_met'])
+        self.assertNotIn('SECRET',str(result))
+        self.assertNotIn('PRIVATE_ID',str(result))
+
+
+class WarmupFailureTests(unittest.TestCase):
+    def test_warmup_failure_is_sanitized_and_sends_no_measured_requests(self):
+        cloud=importlib.import_module('scripts.cloud_verify')
+        original=httpx.AsyncClient
+        for outcome,category in [('timeout','transport:ReadTimeout'),
+                ('http','http_status:503'),('json','response_parse:JSONDecodeError'),
+                ('schema','response_schema:TypeError')]:
+            seen=[]
+            def reply(request):
+                seen.append(1)
+                if len(seen)>1:raise AssertionError('Measured traffic followed failed warmup')
+                if outcome=='timeout':raise httpx.ReadTimeout('SECRET URL',request=request)
+                if outcome=='http':return httpx.Response(503,text='SECRET')
+                if outcome=='json':return httpx.Response(200,text='SECRET')
+                return httpx.Response(200,json={'recommendation_mode':'personalized','items':'SECRET'})
+            def client(**kwargs):return original(**kwargs,transport=httpx.MockTransport(reply))
+            with self.subTest(outcome=outcome),patch.object(cloud.httpx,'AsyncClient',side_effect=client):
+                result=asyncio.run(cloud.warm_level('https://example.invalid',{},['PRIVATE'],5,
+                    {'warmup_requests':20,'k':10,'seconds_per_level':20,'requests_per_level':250}))
+                self.assertEqual(result['status'],'aborted')
+                self.assertEqual(result['phase'],'warmup')
+                self.assertEqual(result['completed_requests'],0)
+                self.assertEqual(result['warmup_failure_counts'],{category:1})
+                self.assertFalse(result['warm_p95_target_met'])
+                self.assertNotIn('SECRET',str(result));self.assertNotIn('PRIVATE',str(result))
+
+
+class ResponseContractTests(unittest.TestCase):
+    def test_malformed_success_items_cannot_pass_latency_gate(self):
+        cloud=importlib.import_module('scripts.cloud_verify')
+        body={'recommendation_mode':'personalized','items':[{}],
+              'model_version':'logistic_fixed','release_version':'release_fixed',
+              'data_as_of':'2011-05-01T00:00:00','score_kind':'raw_model_margin',
+              'scores_are_calibrated_probabilities':False}
+        for items in [[{}],[{'item_id':'A','ranking_score':float('inf'),'description':None}],
+                [{'item_id':'A','ranking_score':True,'description':None}]]:
+            with self.subTest(items=items),self.assertRaises((KeyError,TypeError,ValueError)):
+                cloud.response_status(httpx.Response(200,text=json.dumps({**body,'items':items})),
+                    'personalized',1)

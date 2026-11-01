@@ -136,12 +136,19 @@ set repository/environment variables:
 | `GCP_WIF_PROVIDER` | Provider resource returned by `bootstrap_cloud --apply` |
 | `GCP_DEPLOY_SERVICE_ACCOUNT` | `repeat-demo-deployer@project-c0e2b13a-3cea-47e9-aad.iam.gserviceaccount.com` |
 
-Run **Deploy historical demo** on the exact main commit used to build the image.
-Supply the full immutable image URI and reviewed manifest SHA256. The job uses
+Run **Deploy historical demo** from a reviewed clean operator revision on main.
+Supply the approved immutable image URI and reviewed manifest SHA256. The
+committed `config/approved_cloud_release_v1.json` independently pins the artifact
+source, image, manifest and model identities; inputs cannot override it. The
+original artifact loader/scorer is loaded from its verified Git source tree,
+so a newer operator checkout does not bypass runtime source integrity. See the
+[release reliability runbook](release-reliability.md) for commands and the
+optional rollback rehearsal. Newly built images require a reviewed approval
+record change before deployment; the build commands above do not grant approval. The job uses
 GitHub OIDC/WIF, restricted to repository numeric ID **1406464839**, main and
 the environment subject. There is no stored service-account key. It extracts
 the bundle without running the image, checks manifest/commit/model/source/
-configuration/dependencies, then deploys the digest and obtains a short-lived
+configuration/dependencies, records the clean operator commit separately, then deploys the digest and obtains a short-lived
 invoker token for health, readiness, metadata, known-customer equivalence and
 unknown fallback smoke checks. Receipts are uploaded without bundle contents,
 customer IDs or credentials. Generated OIDC credential files are Git/Docker

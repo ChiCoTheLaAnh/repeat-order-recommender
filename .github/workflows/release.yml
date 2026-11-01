@@ -10,6 +10,11 @@ on:
         description: Expected manifest SHA256 from the reviewed release receipt
         required: true
         type: string
+      rehearse_rollback:
+        description: After successful smoke, restore captured previous revision and smoke again
+        required: false
+        default: false
+        type: boolean
 permissions:
   contents: read
   id-token: write
@@ -31,6 +36,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12.14'
@@ -69,12 +75,12 @@ jobs:
           import json, os
           from pathlib import Path
           from scripts.audit_raw import sha256
-          from scripts.cloud_deploy import clean_commit, validate_deployable_manifest
-          from scripts.release_bundle import ReleaseBundle
+          from scripts.cloud_deploy import clean_commit, approved_release, load_approved_bundle
           p=Path('outputs/ci-release/bundle')
           assert sha256(p/'manifest.json')==os.environ['EXPECTED_MANIFEST_SHA256']
-          validate_deployable_manifest(json.loads((p/'manifest.json').read_text()),clean_commit())
-          ReleaseBundle.load(p)
+          clean_commit()
+          approved_release(p,os.environ['RELEASE_IMAGE'])
+          load_approved_bundle(p,os.environ['RELEASE_IMAGE'])
           PY
       - name: Deploy immutable image
         id: deploy
@@ -106,6 +112,20 @@ jobs:
           uv run --locked python -m scripts.cloud_verify --smoke-only \
             --url "$CLOUD_RUN_URL" --bundle outputs/ci-release/bundle \
             --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --output outputs/ci-release
+      - name: Rehearse rollback to captured previous approved revision
+        if: inputs.rehearse_rollback
+        run: |
+          uv run --locked python -m scripts.cloud_deploy rollback \
+            --receipt outputs/ci-release/deployment.json --output outputs/ci-rollback
+      - name: Verify restored revision with the same frozen offline bundle
+        if: inputs.rehearse_rollback
+        env:
+          CLOUD_RUN_ID_TOKEN: ${{ steps.invoke.outputs.id_token }}
+          CLOUD_RUN_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          uv run --locked python -m scripts.cloud_verify --smoke-only \
+            --url "$CLOUD_RUN_URL" --bundle outputs/ci-release/bundle \
+            --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --output outputs/ci-rollback
       - name: Preserve deployment receipt and smoke evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -115,4 +135,6 @@ jobs:
             outputs/ci-release/deployment.json
             outputs/ci-release/cloud_run_service.json
             outputs/ci-release/cloud_verification.json
+            outputs/ci-rollback/rollback.json
+            outputs/ci-rollback/cloud_verification.json
           if-no-files-found: ignore
