@@ -6,6 +6,7 @@ from datetime import datetime,timedelta,timezone
 from itertools import count
 from functools import wraps
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -17,9 +18,8 @@ import httpx
 import numpy as np
 
 from .audit_raw import ROOT
-from .cloud_deploy import config,gcloud,privacy_preflight
+from .cloud_deploy import config,gcloud,privacy_preflight,load_approved_bundle,APPROVED_RELEASE_PATH
 from .load_test import request_mode,summarize
-from .release_bundle import ReleaseBundle
 
 
 def tls_context():
@@ -74,6 +74,45 @@ def serving_revision(state):
     return traffic[0]['revisionName']
 
 
+def failure_category(error):
+    """Return bounded labels only; exception text can contain IDs and credentials."""
+    if isinstance(error,httpx.HTTPStatusError):
+        return 'http_status:'+str(error.response.status_code)
+    if isinstance(error,httpx.HTTPError):
+        name=next(cls.__name__ for cls in type(error).__mro__ if cls.__module__=='httpx')
+        return 'transport:'+name
+    if isinstance(error,KeyError):return 'response_schema:KeyError'
+    if isinstance(error,TypeError):return 'response_schema:TypeError'
+    if isinstance(error,json.JSONDecodeError):return 'response_parse:JSONDecodeError'
+    if isinstance(error,ValueError):return 'validation:ValueError'
+    return 'setup:UnexpectedError'
+
+
+def response_status(response,expected,k):
+    if response.status_code!=200:
+        return response.status_code,'http_status:'+str(response.status_code)
+    body=response.json()
+    if not isinstance(body,dict):raise TypeError('Response object required')
+    mode,items=body['recommendation_mode'],body['items']
+    if not isinstance(mode,str) or not isinstance(items,list):raise TypeError('Response field types')
+    if any(not isinstance(item,dict) for item in items):raise TypeError('Item object required')
+    if mode!=expected or len(items)!=k:return -1,'response_contract_mismatch'
+    for key in ['model_version','release_version','data_as_of','score_kind']:
+        if not isinstance(body[key],str) or not body[key]:raise TypeError('Release metadata required')
+    if body['scores_are_calibrated_probabilities'] is not False:
+        raise TypeError('Scores must be explicitly uncalibrated')
+    identifiers=[]
+    for item in items:
+        identifier,score,description=item['item_id'],item['ranking_score'],item['description']
+        if not isinstance(identifier,str) or not identifier:raise TypeError('Item identifier required')
+        if isinstance(score,bool) or not isinstance(score,(int,float)) or not math.isfinite(score):
+            raise TypeError('Finite numeric score required')
+        if description is not None and not isinstance(description,str):raise TypeError('Description type')
+        identifiers.append(identifier)
+    if len(set(identifiers))!=len(identifiers):raise TypeError('Duplicate recommendation item')
+    return 200,None
+
+
 async def warm_level(url,headers,customers,concurrency,load):
     latencies,statuses,modes=[],[],[]
     failures=Counter()
@@ -81,8 +120,17 @@ async def warm_level(url,headers,customers,concurrency,load):
     limits=httpx.Limits(max_connections=concurrency,max_keepalive_connections=concurrency)
     async with httpx.AsyncClient(base_url=url,headers=headers,verify=tls_context(),timeout=30,limits=limits) as client:
         for number in range(load['warmup_requests']):
-            response=await client.get('/recommendations/'+customers[number%len(customers)],params={'k':load['k']})
-            response.raise_for_status()
+            try:
+                response=await client.get('/recommendations/'+customers[number%len(customers)],params={'k':load['k']})
+                _,category=response_status(response,'personalized',load['k'])
+            except (httpx.HTTPError,ValueError,KeyError,TypeError) as error:
+                category=failure_category(error)
+            if category:
+                return {'status':'aborted','phase':'warmup','warmup_requests_completed':number,
+                    'warmup_requests_attempted':number+1,'warmup_failure_counts':{category:1},
+                    'completed_requests':0,'successful_requests':0,'failure_counts':{},
+                    'status_counts':{},'latency_all_attempts':None,'latency_successful':None,
+                    'concurrency':concurrency,'warm_p95_target_ms':250,'warm_p95_target_met':False}
         started=time.perf_counter();deadline=started+load['seconds_per_level']
         async def worker():
             while time.perf_counter()<deadline:
@@ -92,35 +140,18 @@ async def warm_level(url,headers,customers,concurrency,load):
                 customer='unknown-cloud-load' if expected=='popularity_fallback' else customers[number%len(customers)]
                 before=time.perf_counter()
                 try:
-                    result=await client.get('/recommendations/'+customer,params={'k':load['k']})
-                    status=result.status_code
-                    ids.add(result.headers.get('X-Instance-Start-Id','unavailable'))
-                    if status==200:
-                        body=result.json()
-                        if body['recommendation_mode']!=expected or len(body['items'])!=load['k']:
-                            status=-1
-                            failures['response_contract_mismatch']+=1
-                    else:failures['http_status:'+str(status)]+=1
-                except httpx.HTTPError as error:
-                    status=0
-                    # Only a library-defined class name: never exception text/URL/body.
-                    name=next(cls.__name__ for cls in type(error).__mro__
-                              if cls.__module__=='httpx')
-                    failures['transport:'+name]+=1
-                except KeyError:
-                    status=0
-                    failures['response_schema:KeyError']+=1
-                except TypeError:
-                    status=0
-                    failures['response_schema:TypeError']+=1
-                except ValueError as error:
-                    status=0
-                    name='JSONDecodeError' if isinstance(error,json.JSONDecodeError) else 'ValueError'
-                    failures['response_parse:'+name]+=1
+                    response=await client.get('/recommendations/'+customer,params={'k':load['k']})
+                    ids.add(response.headers.get('X-Instance-Start-Id','unavailable'))
+                    status,category=response_status(response,expected,load['k'])
+                except (httpx.HTTPError,ValueError,KeyError,TypeError) as error:
+                    status,category=0,failure_category(error)
+                if category:failures[category]+=1
                 latencies.append(1000*(time.perf_counter()-before));statuses.append(status);modes.append(expected)
         await asyncio.gather(*(worker() for _ in range(concurrency)))
         result=summarize(latencies,statuses,time.perf_counter()-started)
-        result.update({'concurrency':concurrency,'failure_counts':dict(sorted(failures.items())),'attempted_mode_counts':dict(Counter(modes)),
+        result.update({'status':'completed','concurrency':concurrency,
+            'warmup_requests_completed':load['warmup_requests'],'warmup_failure_counts':{},
+            'failure_counts':dict(sorted(failures.items())),'attempted_mode_counts':dict(Counter(modes)),
             'instance_start_ids_seen':sorted(ids),'scope':'remote Cloud Run HTTP; includes client networking/TLS',
             'requests_cap':load['requests_per_level'],'duration_cap_seconds':load['seconds_per_level']})
         p95=result['latency_all_attempts']['p95_ms'] if result['latency_all_attempts'] else float('inf')
@@ -159,7 +190,8 @@ def verify(url,bundle_path,output,project,region,smoke_only=False,cold_zero_evid
     state=gcloud('run','services','describe',config()['service'],'--project',project,'--region',region,json_output=True)
     if state['status']['url']!=url:raise ValueError('URL does not match the configured project service')
     revision=serving_revision(state)
-    bundle=ReleaseBundle.load(bundle_path)
+    approved=json.loads(APPROVED_RELEASE_PATH.read_text())
+    bundle=load_approved_bundle(bundle_path,approved['image_digest'])
     token=os.environ.get('CLOUD_RUN_ID_TOKEN')
     if not token:token=gcloud('auth','print-identity-token')
     headers={'Authorization':'Bearer '+token}

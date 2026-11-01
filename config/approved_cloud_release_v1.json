@@ -1,0 +1,8 @@
+{
+  "version": "approved_cloud_release_v1",
+  "artifact_source_commit": "b4accd82988a47798df4460f0c205cb95c2c7b74",
+  "image_digest": "us-central1-docker.pkg.dev/project-c0e2b13a-3cea-47e9-aad/repeat-order-demo/service@sha256:71958cb3350563b0099fb700168978435e5df42f291d7a7212403792de7713ae",
+  "manifest_sha256": "fb62b8e85893bb2bb58526f8680aa78e94e24960eabee54cad2bf41c1955c742",
+  "release_id": "release_v1_35f8ccbb4cd8b9ada5b40696103a25e8f3969f3a54081e310a84354fd81221f6",
+  "model_version": "logistic_dd79f226da8964d6"
+}

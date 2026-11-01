@@ -1368,3 +1368,13 @@ Shell; browser authorization did not authenticate the Codex runner. The guide
 includes project/identity checks, keyless invocation, deployment and bounded
 remote verification commands. Git does not contain the fitted model or bundle;
 the guide preserves the original logistic weights and never invokes training.
+
+### Release reliability follow-up
+
+The [release reliability runbook](docs/release-reliability.md) separates approved
+artifact provenance from the deployment-operator commit, documents an OIDC
+rollback rehearsal, and prepares scoped infrastructure alerts. Run the
+[one-attempt cloud diagnostic](docs/cloud-load-diagnostics.md) before further
+load testing. It records sanitized setup/warmup failures and preserves the
+original 1/250 failure; no new live pass is implied. The frozen model, image,
+recommendation policies and unopened test split are unchanged.
