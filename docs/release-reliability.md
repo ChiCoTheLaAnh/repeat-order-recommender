@@ -1,7 +1,10 @@
 # Release reliability follow-up
 
-This change prepares operational verification; it does not assert a new cloud
-pass. The original cloud report, failed 5-client gate, and unconfirmed client
+The implementation prepared operational verification without claiming a live
+pass. The subsequent single diagnostic run completed 250/250 requests with no
+observed errors; see the [recorded follow-up](cloud-verification-2026-10-26.md#single-bounded-diagnostic-follow-up-november-1-2026). It did not reproduce the
+original failed attempt. OIDC deployment/rollback and alert delivery remain
+unverified. The original cloud report, failed 5-client gate, and unconfirmed client
 cold start remain authoritative. The selected logistic weights and runtime image
 are unchanged. No held-out test, retraining or new recommendation policy is used.
 
@@ -131,8 +134,8 @@ samples remain unavailable, never zero or proof of a healthy service.
 
 The managed environment reports no outbound Google identity and no credential
 bindings. Its gcloud invocation selects an empty read-only credential directory;
-project/region variables alone provide no authorization. Consequently no new
-cloud requests, deployments, traffic switches, alert changes or delivery tests
+project/region variables alone provide no authorization. The later user-authorized Cloud Shell diagnostic is recorded separately. No
+OIDC deployments, rollback traffic switches, alert changes or delivery tests
 are claimed here. The user's authorized Cloud Shell and GitHub OIDC workflow
 remain the supported execution paths. No token or service-account key is needed
 in chat.

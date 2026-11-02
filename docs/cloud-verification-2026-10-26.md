@@ -159,6 +159,50 @@ first-request timing and warm results are unchanged. Closing Cloud Shell after
 this check does not stop the independently deployed Cloud Run service and is
 not evidence that its instances have scaled to zero.
 
+## Single bounded diagnostic follow-up: November 1, 2026
+
+The user supplied `cloudshell-diagnostic-once.json`, SHA256
+`a065ef8edc17e2a72c098bc3695fa99a37a148431e8d7695f5b94120b4882669`.
+Its collector, warm collector, dependency-lock and approval-file hashes match
+operator commit `3ebaf894fde85900abbc455649649753922fd0aa`. The approved
+artifact source remains `b4accd8`, with the same image, manifest, model and serving
+revision `repeat-order-historical-demo-00001-2jz`. Privacy preflight passed.
+The original frozen-source bundle loaded successfully through the separate
+operator path; this run did not deploy, retrain or evaluate the held-out test.
+
+The receipt spans November 1, **20:59:05–20:59:38 CST**
+(`2026-11-02T02:59:05.354206Z`–`02:59:38.651906Z`). The warm stage started
+at `02:59:33.121228Z`. The client was Linux x86_64 Google Cloud Shell with four
+visible CPUs; its CPU/memory quota is unknown. The workload used five clients,
+K=10, 20 excluded warmups, then at most 250 measured requests or a 20-second
+admission window, with a 30-second per-request timeout. It reached the request
+cap in **5.043 seconds**, not a sustained 20-second test.
+
+| Result | Observation |
+| --- | ---: |
+| Measured successful / attempted | **250 / 250** |
+| Error rate | **0%** |
+| All-attempt p50 / p95 | **16.764 / 22.310 ms** |
+| Mean latency | **78.924 ms** |
+| Completed and successful throughput | **49.575 requests/sec** |
+| Attempted personalized / fallback mix | **225 / 25** |
+| Warmup / measured failure category counts | Both empty |
+| Combined p95 <=250 ms and zero-error gate | **Passed for this sample** |
+
+The mean exceeding p95 indicates that p95 does not describe the full latency
+tail. Without raw per-request samples, its maximum, exception history or cause
+cannot be reconstructed. One instance-start ID was observed, but cold start was
+explicitly not measured. Native monitoring and process memory were not collected
+by this diagnostic; earlier values are not presented as measurements of this run.
+
+Offline inspection verified hash/identity matches and count, throughput and
+gate arithmetic. Percentiles could not be independently recomputed without raw
+samples. The original **249/250** five-client run and its failed combined gate
+remain recorded above. The new instrumentation observed **no failure to classify**;
+it did not reproduce or resolve the original status-0 cause. No further load
+reruns are justified solely to obtain another pass. These short synthetic samples
+are not evidence of customer behavior, sustained capacity or a reliability SLA.
+
 ## Remaining work and release decision
 
 1. Cold-start verification remains open after the guarded attempt above. If
@@ -166,9 +210,10 @@ not evidence that its instances have scaled to zero.
    [Cloud Shell guide](cloud-shell-deployment.md) after all clients stop. Missing
    instance-count samples remain unknown, not zero; do not redeploy merely to
    repeat the measurement.
-2. Investigate the status-0 attempt. A subsequent bounded diagnostic run may
-   record exception classes without URLs/customer IDs; retain this original
-   failed-gate result and do not claim its cause from these aggregates alone.
+2. The single instrumented follow-up completed without reproducing status 0.
+   Keep its cause unresolved and the original failed gate visible; retain the
+   sanitized collector for future naturally observed failures. Do not rerun
+   solely to replace historical evidence.
 3. GitHub OIDC deployment and rollback have not been exercised by this manual
    Cloud Shell run. The deployment receipt has no previous service to restore;
    this is the first recorded revision. Existing documented CI/rollback steps
