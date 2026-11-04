@@ -47,8 +47,15 @@ exception class. There is no retry-until-success loop.
 
 ## OIDC deployment and rollback rehearsal
 
-After this PR is reviewed and merged to `main`, use the existing GitHub
-`historical-demo` environment and configured WIF variables. There is no stored
+For the actual setup status and copy-paste Cloud Shell checks, follow the
+[Vietnamese operations checklist](operations-checklist-vi.md). Environment
+creation was attempted and rejected with HTTP 403 by the GitHub integration;
+`historical-demo` and its variables must be configured by the repository admin.
+The release workflow has not yet been executed. The provider resource must be
+read from Google configuration, not guessed from the project ID.
+
+After configuring the GitHub `historical-demo` environment and WIF variables,
+run the reviewed release workflow from `main`. PR #3 and PR #4 are already merged. There is no stored
 service-account key. Do not dispatch the old workflow before the provenance fix
 is on `main`; it rejects the old bundle against the new checkout.
 

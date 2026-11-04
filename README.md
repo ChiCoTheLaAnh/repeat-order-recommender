@@ -1378,3 +1378,17 @@ rollback rehearsal, and prepares scoped infrastructure alerts. Run the
 load testing. It records sanitized setup/warmup failures and preserves the
 original 1/250 failure; no new live pass is implied. The frozen model, image,
 recommendation policies and unopened test split are unchanged.
+
+### Operational handoff and interview walkthrough
+
+The Vietnamese [operations checklist](docs/operations-checklist-vi.md) gives
+Cloud Shell preflight, exact GitHub environment/variable setup, one OIDC
+rollback rehearsal and separate monitoring/delivery acceptance criteria.
+The current integration cannot create the GitHub environment (HTTP 403), and
+live OIDC/rollback/alert verification remains pending user-authorized setup.
+PR #4 was merged after passing CI, preserving both cloud load observations.
+
+The [2–3 minute interview walkthrough](docs/interview-demo-vi.md) includes an
+architecture diagram, evidence checklist, measured model/cloud results and
+explicit limitations. Its status table distinguishes implemented tooling from
+live verified behavior; no production or business-lift claim is implied.
