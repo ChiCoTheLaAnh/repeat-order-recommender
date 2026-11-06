@@ -201,7 +201,9 @@ Không xóa image/revision gốc hoặc nới public IAM để sửa smoke 403.
    **Email** bằng email Google account hiện tại của m. Xác minh trực tiếp trong
    Console/inbox; không đưa địa chỉ hoặc nội dung thư vào repo/chat.
 2. Lấy resource name `projects/.../notificationChannels/<number>` của channel
-   verified/enabled. Resource ID là identifier, không phải token. Chạy ba lệnh
+   enabled, verified nếu Google yêu cầu. `UNVERIFIED` phải xác minh trước;
+   field bị lược bỏ/`VERIFICATION_STATUS_UNSPECIFIED` có thể dùng nhưng không
+   chứng minh đã nhận email. Resource ID là identifier, không phải token. Chạy ba lệnh
    `prepare`, `apply`, `inspect` trong [release runbook](release-reliability.md#monitoring-configuration-and-delivery)
    từ operator checkout, dùng đúng channel đó. Hai policies là native 5xx và
    bundle-load failure, scoped vào service/region hiện có.

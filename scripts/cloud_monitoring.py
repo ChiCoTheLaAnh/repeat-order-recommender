@@ -55,17 +55,30 @@ def list_resources(client,path,key):
         if not page:return results
 
 
-def verified_channel(client,channel):
+def channel_status(state):
+    """Google treats omitted/unspecified as usable, not as delivery verification.
+
+    Discovery v3 NotificationChannel.verificationStatus: only UNVERIFIED
+    requires verification to function. Unknown future enums remain fail-closed.
+    """
+    verification=state.get('verificationStatus','VERIFICATION_STATUS_UNSPECIFIED')
+    enabled=state.get('enabled') is not False
+    return {'channel_enabled':enabled,'channel_verification_status':verification,
+        'channel_verified':verification=='VERIFIED',
+        'channel_usable':enabled and verification in ['VERIFIED','VERIFICATION_STATUS_UNSPECIFIED']}
+
+
+def usable_channel(client,channel):
     state=get(client,channel)
-    if state.get('verificationStatus')!='VERIFIED' or state.get('enabled') is False:
-        raise ValueError('Notification channel must be enabled and verified')
+    if not channel_status(state)['channel_usable']:
+        raise ValueError('Notification channel must be enabled and verified when verification is required')
     return state
 
 
 def apply_alerts(channel):
     policies=alert_policies(channel);parent='projects/'+config()['project']
     with monitoring_client() as client:
-        verified_channel(client,channel)
+        state=usable_channel(client,channel)
         existing=list_resources(client,parent+'/alertPolicies','alertPolicies')
         names=[]
         for policy in policies:
@@ -78,7 +91,19 @@ def apply_alerts(channel):
             else:response=client.post(parent+'/alertPolicies',json=policy)
             response.raise_for_status();names.append(response.json()['name'])
     return {'status':'configured','policies':names,'notification_channel':channel,
-            'notification_delivery_verified':False,'note':'Configuration is not an end-to-end notification test'}
+            **channel_status(state),'notification_delivery_verified':False,
+            'note':'Usable channel configuration is not an end-to-end notification test'}
+
+
+def threshold_matches(actual,expected):
+    """Proto3 double threshold_value defaults to zero when JSON omits it.
+
+    Normalize only this observed numeric default; preserve all other drift.
+    """
+    if not isinstance(actual,dict):return False
+    value=actual.get('thresholdValue',0)
+    if isinstance(value,bool) or not isinstance(value,(int,float)):return False
+    return {**actual,'thresholdValue':value}=={**expected,'thresholdValue':expected.get('thresholdValue',0)}
 
 
 def inspect_monitoring(channel):
@@ -100,18 +125,18 @@ def inspect_monitoring(channel):
         thresholds=[c.get('conditionThreshold') for c in actual.get('conditions',[])]
         alerts.append({'display_name':policy['displayName'],'unique':len(matches)==1,
             'enabled':actual.get('enabled') is True,'channel_matches':actual.get('notificationChannels')==[channel],
-            'condition_matches':thresholds==[policy['conditions'][0]['conditionThreshold']]})
+            'condition_matches':len(thresholds)==1 and threshold_matches(
+                thresholds[0],policy['conditions'][0]['conditionThreshold'])})
     return {'status':'inventory_only','log_metrics':checks,'alerts':alerts,
         'dashboard_present':any(d.get('displayName')=='Historical recommendation demo — operational metrics' for d in dashboards),
-        'channel_enabled':channel_state.get('enabled') is not False,
-        'channel_verified':channel_state.get('verificationStatus')=='VERIFIED',
+        **channel_status(channel_state),
         'notification_delivery_verified':False,'sample_availability':'not checked; missing samples remain unknown'}
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command',choices=['prepare','apply','inspect'])
-    parser.add_argument('--channel',required=True,help='Existing verified channel resource; never an email address')
+    parser.add_argument('--channel',required=True,help='Existing enabled channel, verified if required; never an email address')
     parser.add_argument('--output',type=Path,default=ROOT/'outputs/milestone4/monitoring-followup.json')
     args=parser.parse_args()
     try:
