@@ -1,0 +1,1725 @@
+{
+  "schemaVersion": "public_demo_v1",
+  "defaultProfile": "demo-typical",
+  "metadata": {
+    "dataAsOf": "2011-05-01T00:00:00",
+    "windowStart": "2010-11-02T00:00:00",
+    "windowDays": 180,
+    "releaseId": "release_v1_35f8ccbb4cd8b9ada5b40696103a25e8f3969f3a54081e310a84354fd81221f6",
+    "modelVersion": "logistic_dd79f226da8964d6",
+    "artifactSourceCommit": "b4accd82988a47798df4460f0c205cb95c2c7b74",
+    "inferenceMode": "precomputed",
+    "repository": "https://github.com/ChiCoTheLaAnh/repeat-order-recommender"
+  },
+  "quality": {
+    "heuristicNdcg": 0.3351,
+    "logisticNdcg": 0.378038,
+    "xgbNdcg": 0.379499,
+    "primaryQueries": 1817,
+    "primaryQueryFraction": 0.2359,
+    "description": "Validation queries with at least one known-catalog target; no measured business lift."
+  },
+  "profiles": [
+    {
+      "id": "demo-light",
+      "label": "Lighter history",
+      "subtitle": "Fewer purchase invoices",
+      "mode": "personalized",
+      "summary": {
+        "invoiceCount": 1,
+        "skuCount": 28,
+        "daysSinceLastPurchase": 2.3895833333333334
+      },
+      "monthly": [
+        {
+          "month": "2010-11",
+          "label": "Nov 2010",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2010-12",
+          "label": "Dec 2010",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2011-01",
+          "label": "Jan 2011",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2011-02",
+          "label": "Feb 2011",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2011-03",
+          "label": "Mar 2011",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2011-04",
+          "label": "Apr 2011",
+          "invoiceCount": 1
+        }
+      ],
+      "recommendations": [
+        {
+          "rank": 1,
+          "sku": "85150",
+          "name": "LADIES & GENTLEMEN METAL SIGN",
+          "score": -2.8768355183197634,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 2,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 2,
+          "sku": "85123A",
+          "name": "WHITE HANGING HEART T-LIGHT HOLDER",
+          "score": -3.252154429084554,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 3,
+          "sku": "22189",
+          "name": "CREAM HEART CARD HOLDER",
+          "score": -3.2704883676885554,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 2,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 4,
+          "sku": "16161P",
+          "name": "WRAP ENGLISH ROSE",
+          "score": -3.3931230639875034,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 5,
+          "sku": "84077",
+          "name": "WORLD WAR 2 GLIDERS ASSTD DESIGNS",
+          "score": -3.4417621019563933,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 6,
+          "sku": "21166",
+          "name": "COOK WITH WINE METAL SIGN",
+          "score": -3.4531398622274794,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 7,
+          "sku": "21175",
+          "name": "GIN + TONIC DIET METAL SIGN",
+          "score": -3.4970547956849254,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 8,
+          "sku": "82583",
+          "name": "HOT BATHS METAL SIGN",
+          "score": -3.590349826985916,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 9,
+          "sku": "21915",
+          "name": "RED  HARMONICA IN BOX",
+          "score": -3.6384984670381924,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 10,
+          "sku": "21790",
+          "name": "VINTAGE SNAP CARDS",
+          "score": -3.6419987930575077,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 11,
+          "sku": "16156S",
+          "name": "WRAP PINK FAIRY CAKES",
+          "score": -3.6526926061073466,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 12,
+          "sku": "21703",
+          "name": "BAG 125g SWIRLY MARBLES",
+          "score": -3.6668462941209157,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 13,
+          "sku": "21977",
+          "name": "PACK OF 60 PINK PAISLEY CAKE CASES",
+          "score": -3.6723039961014536,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 14,
+          "sku": "22492",
+          "name": "MINI PAINT SET VINTAGE",
+          "score": -3.67625611613074,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 15,
+          "sku": "22440",
+          "name": "BALLOON WATER BOMB PACK OF 35",
+          "score": -3.694067157887992,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 16,
+          "sku": "22969",
+          "name": "HOMEMADE JAM SCENTED CANDLES",
+          "score": -3.7119091531079977,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 17,
+          "sku": "85152",
+          "name": "HAND OVER THE CHOCOLATE   SIGN",
+          "score": -3.7192364834978546,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 263.5986022949219,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 18,
+          "sku": "22550",
+          "name": "HOLIDAY FUN LUDO",
+          "score": -3.7503209148614354,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 19,
+          "sku": "22707",
+          "name": "WRAP MONSTER FUN",
+          "score": -3.7605009465436527,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 20,
+          "sku": "22710",
+          "name": "WRAP I LOVE LONDON",
+          "score": -3.7847441641043424,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 2.3895833492279053,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demo-typical",
+      "label": "Typical history",
+      "subtitle": "Middle of the historical range",
+      "mode": "personalized",
+      "summary": {
+        "invoiceCount": 2,
+        "skuCount": 16,
+        "daysSinceLastPurchase": 67.53819444444444
+      },
+      "monthly": [
+        {
+          "month": "2010-11",
+          "label": "Nov 2010",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2010-12",
+          "label": "Dec 2010",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2011-01",
+          "label": "Jan 2011",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2011-02",
+          "label": "Feb 2011",
+          "invoiceCount": 2
+        },
+        {
+          "month": "2011-03",
+          "label": "Mar 2011",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2011-04",
+          "label": "Apr 2011",
+          "invoiceCount": 0
+        }
+      ],
+      "recommendations": [
+        {
+          "rank": 1,
+          "sku": "85099B",
+          "name": "JUMBO BAG RED RETROSPOT",
+          "score": -2.008803562488669,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 5,
+          "daysSinceLastPurchase": 73.36597442626953,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 2,
+          "sku": "22993",
+          "name": "SET OF 4 PANTRY JELLY MOULDS",
+          "score": -2.6222415919999333,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 73.36597442626953,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 3,
+          "sku": "20914",
+          "name": "SET/5 RED RETROSPOT LID GLASS BOWLS",
+          "score": -2.800709339340557,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 2,
+          "daysSinceLastPurchase": 73.36597442626953,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 4,
+          "sku": "22607",
+          "name": "WOODEN ROUNDERS GARDEN SET",
+          "score": -2.892181033732948,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 2,
+          "daysSinceLastPurchase": 73.36597442626953,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 5,
+          "sku": "21212",
+          "name": "PACK OF 72 RETROSPOT CAKE CASES",
+          "score": -2.9688132776569125,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 2,
+          "daysSinceLastPurchase": 223.45693969726562,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 6,
+          "sku": "22423",
+          "name": "REGENCY CAKESTAND 3 TIER",
+          "score": -2.9838443932951066,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 277.553466796875,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 7,
+          "sku": "22722",
+          "name": "SET OF 6 SPICE TINS PANTRY DESIGN",
+          "score": -2.9853306060647884,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 73.36597442626953,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 8,
+          "sku": "22501",
+          "name": "PICNIC BASKET WICKER LARGE",
+          "score": -3.0272352030712364,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 73.36597442626953,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 9,
+          "sku": "22960",
+          "name": "JAM MAKING SET WITH JARS",
+          "score": -3.0377667391772203,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 73.36597442626953,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 10,
+          "sku": "20724",
+          "name": "RED RETROSPOT CHARLOTTE BAG",
+          "score": -3.2112137119897275,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 4,
+          "daysSinceLastPurchase": 223.45693969726562,
+          "sources": [
+            "history",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 11,
+          "sku": "22502",
+          "name": "PICNIC BASKET WICKER SMALL",
+          "score": -3.212560145009074,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 73.36597442626953,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 12,
+          "sku": "22969",
+          "name": "HOMEMADE JAM SCENTED CANDLES",
+          "score": -3.3056135252758914,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 73.36597442626953,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 13,
+          "sku": "22356",
+          "name": "CHARLOTTE BAG PINK POLKADOT",
+          "score": -3.3311117001723165,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 4,
+          "daysSinceLastPurchase": 223.45693969726562,
+          "sources": [
+            "history",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 14,
+          "sku": "22382",
+          "name": "LUNCH BAG SPACEBOY DESIGN",
+          "score": -3.3337492776418154,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 2,
+          "daysSinceLastPurchase": 338.3888854980469,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 15,
+          "sku": "22666",
+          "name": "RECIPE BOX PANTRY YELLOW DESIGN",
+          "score": -3.5323690032534465,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 277.553466796875,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 16,
+          "sku": "84879",
+          "name": "ASSORTED COLOUR BIRD ORNAMENT",
+          "score": -3.5594620311198533,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 338.3888854980469,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 17,
+          "sku": "21181",
+          "name": "PLEASE ONE PERSON METAL SIGN",
+          "score": -3.6365079120305897,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 223.45693969726562,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 18,
+          "sku": "22386",
+          "name": "JUMBO BAG PINK POLKADOT",
+          "score": -3.638277003605177,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 2,
+          "daysSinceLastPurchase": 223.45693969726562,
+          "sources": [
+            "history",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 19,
+          "sku": "22383",
+          "name": "LUNCH BAG SUKI DESIGN",
+          "score": -3.640711917690766,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 338.3888854980469,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 20,
+          "sku": "21166",
+          "name": "COOK WITH WINE METAL SIGN",
+          "score": -3.667739192437177,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 223.45693969726562,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demo-frequent",
+      "label": "Frequent purchases",
+      "subtitle": "More purchase invoices",
+      "mode": "personalized",
+      "summary": {
+        "invoiceCount": 86,
+        "skuCount": 967,
+        "daysSinceLastPurchase": 2.3930555555555557
+      },
+      "monthly": [
+        {
+          "month": "2010-11",
+          "label": "Nov 2010",
+          "invoiceCount": 25
+        },
+        {
+          "month": "2010-12",
+          "label": "Dec 2010",
+          "invoiceCount": 35
+        },
+        {
+          "month": "2011-01",
+          "label": "Jan 2011",
+          "invoiceCount": 4
+        },
+        {
+          "month": "2011-02",
+          "label": "Feb 2011",
+          "invoiceCount": 5
+        },
+        {
+          "month": "2011-03",
+          "label": "Mar 2011",
+          "invoiceCount": 12
+        },
+        {
+          "month": "2011-04",
+          "label": "Apr 2011",
+          "invoiceCount": 5
+        }
+      ],
+      "recommendations": [
+        {
+          "rank": 1,
+          "sku": "21034",
+          "name": "REX CASH+CARRY JUMBO SHOPPER",
+          "score": 1.7618064445007127,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 24,
+          "daysSinceLastPurchase": 37.432640075683594,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 2,
+          "sku": "20726",
+          "name": "LUNCH BAG WOODLAND",
+          "score": 1.0477765669550427,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 9,
+          "daysSinceLastPurchase": 13.474305152893066,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 3,
+          "sku": "47566",
+          "name": "PARTY BUNTING",
+          "score": 0.8911860826669029,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 7,
+          "daysSinceLastPurchase": 22.35069465637207,
+          "sources": [
+            "history",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 4,
+          "sku": "21212",
+          "name": "PACK OF 72 RETROSPOT CAKE CASES",
+          "score": 0.8799789008967425,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 8,
+          "daysSinceLastPurchase": 13.474305152893066,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 5,
+          "sku": "20728",
+          "name": "LUNCH BAG CARS BLUE",
+          "score": 0.8686224196917189,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 8,
+          "daysSinceLastPurchase": 13.474305152893066,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 6,
+          "sku": "22457",
+          "name": "NATURAL SLATE HEART CHALKBOARD",
+          "score": 0.8469970886735965,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 9,
+          "daysSinceLastPurchase": 13.473610877990723,
+          "sources": [
+            "history",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 7,
+          "sku": "22383",
+          "name": "LUNCH BAG SUKI DESIGN",
+          "score": 0.829224846655479,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 8,
+          "daysSinceLastPurchase": 13.474305152893066,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 8,
+          "sku": "22197",
+          "name": "SMALL POPCORN HOLDER",
+          "score": 0.7836112798104251,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 8,
+          "daysSinceLastPurchase": 13.474305152893066,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 9,
+          "sku": "84755",
+          "name": "COLOUR GLASS T-LIGHT HOLDER HANGING",
+          "score": 0.7600499891031527,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 8,
+          "daysSinceLastPurchase": 36.389583587646484,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 10,
+          "sku": "84536A",
+          "name": "ENGLISH ROSE NOTEBOOK A7 SIZE",
+          "score": 0.7176217057384271,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 9,
+          "daysSinceLastPurchase": 13.473610877990723,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 11,
+          "sku": "22382",
+          "name": "LUNCH BAG SPACEBOY DESIGN",
+          "score": 0.6431856168061358,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 9,
+          "daysSinceLastPurchase": 53.47916793823242,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 12,
+          "sku": "85099B",
+          "name": "JUMBO BAG RED RETROSPOT",
+          "score": 0.6237910683135333,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 10,
+          "daysSinceLastPurchase": 53.47916793823242,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 13,
+          "sku": "84879",
+          "name": "ASSORTED COLOUR BIRD ORNAMENT",
+          "score": 0.6178608934893317,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 7,
+          "daysSinceLastPurchase": 43.45277786254883,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 14,
+          "sku": "20727",
+          "name": "LUNCH BAG  BLACK SKULL.",
+          "score": 0.6052407016232042,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 9,
+          "daysSinceLastPurchase": 53.47916793823242,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 15,
+          "sku": "21928",
+          "name": "JUMBO BAG SCANDINAVIAN BLUE PAISLEY",
+          "score": 0.5463025480101278,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 10,
+          "daysSinceLastPurchase": 37.432640075683594,
+          "sources": [
+            "history",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 16,
+          "sku": "85099C",
+          "name": "JUMBO  BAG BAROQUE BLACK WHITE",
+          "score": 0.5379051806394903,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 9,
+          "daysSinceLastPurchase": 36.389583587646484,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 17,
+          "sku": "21931",
+          "name": "JUMBO STORAGE BAG SUKI",
+          "score": 0.5238388176919297,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 8,
+          "daysSinceLastPurchase": 37.432640075683594,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 18,
+          "sku": "85123A",
+          "name": "WHITE HANGING HEART T-LIGHT HOLDER",
+          "score": 0.49299503739976824,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 11,
+          "daysSinceLastPurchase": 115.26875305175781,
+          "sources": [
+            "history",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 19,
+          "sku": "20975",
+          "name": "12 PENCILS SMALL TUBE RED RETROSPOT",
+          "score": 0.45460537324979367,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 7,
+          "daysSinceLastPurchase": 61.436805725097656,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 20,
+          "sku": "22558",
+          "name": "CLOTHES PEGS RETROSPOT PACK 24",
+          "score": 0.42123725868782724,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 6,
+          "daysSinceLastPurchase": 13.474305152893066,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demo-less-recent",
+      "label": "Longer since purchase",
+      "subtitle": "A less recent returning customer",
+      "mode": "personalized",
+      "summary": {
+        "invoiceCount": 1,
+        "skuCount": 4,
+        "daysSinceLastPurchase": 179.51319444444445
+      },
+      "monthly": [
+        {
+          "month": "2010-11",
+          "label": "Nov 2010",
+          "invoiceCount": 1
+        },
+        {
+          "month": "2010-12",
+          "label": "Dec 2010",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2011-01",
+          "label": "Jan 2011",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2011-02",
+          "label": "Feb 2011",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2011-03",
+          "label": "Mar 2011",
+          "invoiceCount": 0
+        },
+        {
+          "month": "2011-04",
+          "label": "Apr 2011",
+          "invoiceCount": 0
+        }
+      ],
+      "recommendations": [
+        {
+          "rank": 1,
+          "sku": "84879",
+          "name": "ASSORTED COLOUR BIRD ORNAMENT",
+          "score": -3.0043590680909893,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 2,
+          "daysSinceLastPurchase": 179.51319885253906,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 2,
+          "sku": "22139",
+          "name": "RETROSPOT TEA SET CERAMIC 11 PC",
+          "score": -3.492430396415757,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 2,
+          "daysSinceLastPurchase": 179.51319885253906,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 3,
+          "sku": "22090",
+          "name": "PAPER BUNTING RETROSPOT",
+          "score": -3.9166980848573365,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 192.55555725097656,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 4,
+          "sku": "21136",
+          "name": "PAINTED METAL PEARS ASSORTED",
+          "score": -3.971377983405988,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 179.51319885253906,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 5,
+          "sku": "22083",
+          "name": "PAPER CHAIN KIT RETROSPOT",
+          "score": -4.154582572856097,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 192.55555725097656,
+          "sources": [
+            "history",
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 6,
+          "sku": "22900",
+          "name": "SET 2 TEA TOWELS I LOVE LONDON",
+          "score": -4.44446221380118,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 192.55555725097656,
+          "sources": [
+            "history",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 7,
+          "sku": "47566",
+          "name": "PARTY BUNTING",
+          "score": -4.8453550189885135,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 8,
+          "sku": "21212",
+          "name": "PACK OF 72 RETROSPOT CAKE CASES",
+          "score": -4.945142331732228,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 9,
+          "sku": "22423",
+          "name": "REGENCY CAKESTAND 3 TIER",
+          "score": -4.949575763314946,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 10,
+          "sku": "22084",
+          "name": "PAPER CHAIN KIT EMPIRE",
+          "score": -4.957325362058054,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 11,
+          "sku": "85123A",
+          "name": "WHITE HANGING HEART T-LIGHT HOLDER",
+          "score": -5.06436882617829,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 12,
+          "sku": "23206",
+          "name": "LUNCH BAG APPLE DESIGN",
+          "score": -5.091091198565338,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 13,
+          "sku": "20725",
+          "name": "LUNCH BAG RED RETROSPOT",
+          "score": -5.147259760018942,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 14,
+          "sku": "22993",
+          "name": "SET OF 4 PANTRY JELLY MOULDS",
+          "score": -5.164328844828016,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 15,
+          "sku": "22131",
+          "name": "FOOD CONTAINER SET 3 LOVE HEART",
+          "score": -5.194115735363345,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": true,
+          "purchaseInvoiceCount": 1,
+          "daysSinceLastPurchase": 179.51319885253906,
+          "sources": [
+            "history",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 16,
+          "sku": "23207",
+          "name": "LUNCH BAG ALPHABET DESIGN",
+          "score": -5.222013453179967,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 17,
+          "sku": "23199",
+          "name": "JUMBO BAG APPLES",
+          "score": -5.235379895025543,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 18,
+          "sku": "23201",
+          "name": "JUMBO BAG ALPHABET",
+          "score": -5.244804325010595,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 19,
+          "sku": "22499",
+          "name": "WOODEN UNION JACK BUNTING",
+          "score": -5.258471361668365,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "neighbors",
+            "recent_popularity",
+            "long_popularity"
+          ]
+        },
+        {
+          "rank": 20,
+          "sku": "23208",
+          "name": "LUNCH BAG VINTAGE LEAF DESIGN",
+          "score": -5.263130604782096,
+          "scoreKind": "raw_model_margin",
+          "previouslyPurchased": false,
+          "purchaseInvoiceCount": 0,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity",
+            "long_popularity"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demo-guest",
+      "label": "Unknown customer",
+      "subtitle": "No personal history available",
+      "mode": "popularity_fallback",
+      "summary": null,
+      "monthly": [],
+      "recommendations": [
+        {
+          "rank": 1,
+          "sku": "47566",
+          "name": "PARTY BUNTING",
+          "score": 151.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 2,
+          "sku": "85123A",
+          "name": "WHITE HANGING HEART T-LIGHT HOLDER",
+          "score": 142.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 3,
+          "sku": "22423",
+          "name": "REGENCY CAKESTAND 3 TIER",
+          "score": 138.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 4,
+          "sku": "22084",
+          "name": "PAPER CHAIN KIT EMPIRE",
+          "score": 127.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 5,
+          "sku": "84879",
+          "name": "ASSORTED COLOUR BIRD ORNAMENT",
+          "score": 104.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 6,
+          "sku": "20725",
+          "name": "LUNCH BAG RED RETROSPOT",
+          "score": 95.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 7,
+          "sku": "21212",
+          "name": "PACK OF 72 RETROSPOT CAKE CASES",
+          "score": 94.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 8,
+          "sku": "22993",
+          "name": "SET OF 4 PANTRY JELLY MOULDS",
+          "score": 87.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 9,
+          "sku": "85099B",
+          "name": "JUMBO BAG RED RETROSPOT",
+          "score": 83.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 10,
+          "sku": "21181",
+          "name": "PLEASE ONE PERSON METAL SIGN",
+          "score": 73.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 11,
+          "sku": "22499",
+          "name": "WOODEN UNION JACK BUNTING",
+          "score": 73.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 12,
+          "sku": "22383",
+          "name": "LUNCH BAG SUKI DESIGN",
+          "score": 72.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 13,
+          "sku": "22457",
+          "name": "NATURAL SLATE HEART CHALKBOARD",
+          "score": 72.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 14,
+          "sku": "23206",
+          "name": "LUNCH BAG APPLE DESIGN",
+          "score": 72.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 15,
+          "sku": "22722",
+          "name": "SET OF 6 SPICE TINS PANTRY DESIGN",
+          "score": 69.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 16,
+          "sku": "84755",
+          "name": "COLOUR GLASS T-LIGHT HOLDER HANGING",
+          "score": 68.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 17,
+          "sku": "84991",
+          "name": "60 TEATIME FAIRY CAKE CASES",
+          "score": 67.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 18,
+          "sku": "22178",
+          "name": "VICTORIAN GLASS HANGING T-LIGHT",
+          "score": 66.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 19,
+          "sku": "22382",
+          "name": "LUNCH BAG SPACEBOY DESIGN",
+          "score": 66.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        },
+        {
+          "rank": 20,
+          "sku": "22699",
+          "name": "ROSES REGENCY TEACUP AND SAUCER",
+          "score": 66.0,
+          "scoreKind": "distinct_identified_purchasers_30d",
+          "previouslyPurchased": null,
+          "purchaseInvoiceCount": null,
+          "daysSinceLastPurchase": null,
+          "sources": [
+            "recent_popularity"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1419,3 +1419,14 @@ read-only Cloud Run access/scaling and Billing review steps. Fresh live access/
 billing observations are still pending owner access; no zero-cost claim is made.
 No new API/model, training, deployment, load run or held-out evaluation is needed
 to present this historical demo honestly.
+
+## Interactive public demo
+
+An English, mobile-friendly static product demo lives in [`web/`](web/). Explore four pseudonymized historical shoppers or an unknown-customer popularity fallback, monthly invoice activity and top 5/10/20 recommendations. Results are precomputed from the frozen logistic release using only history before May 1, 2011. The private Cloud Run backend is unchanged.
+
+```sh
+npm ci --prefix web
+npm run dev --prefix web
+```
+
+Open `/repeat-order-recommender/` on the printed local URL. See [public demo documentation](docs/public-demo.md) for export provenance, tests, privacy boundaries and manual GitHub Pages publishing. Public deployment is verified separately from build success.
