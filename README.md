@@ -1402,3 +1402,20 @@ traffic to `00001-2jz`, and pass both smoke checks. The image/model are unchange
 this verifies rollback between distinct revisions of the frozen release.
 Monitoring alert delivery remains pending. Earlier auth/API failures and both
 historical load observations remain recorded rather than replaced.
+
+
+### Final demo evidence and current limits
+
+[Monitoring configuration is verified](docs/monitoring-verification.md): both
+policies are enabled, unique and match their channel/normalized conditions;
+four log-metric filters/extractors match and the dashboard exists. Email receipt
+and the full alert-delivery path remain unverified; no production error was
+forced to test them. Original false-flag receipts are retained alongside the
+new normalized read-only receipt.
+
+The Vietnamese [demo-ready checklist](docs/demo-ready-checklist-vi.md) indexes
+four existing evidence views, links the 3-minute walkthrough, and gives manual
+read-only Cloud Run access/scaling and Billing review steps. Fresh live access/
+billing observations are still pending owner access; no zero-cost claim is made.
+No new API/model, training, deployment, load run or held-out evaluation is needed
+to present this historical demo honestly.

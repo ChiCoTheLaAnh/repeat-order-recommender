@@ -74,8 +74,9 @@ not an independent assertion about all future service state or reliability.
 
 ## Remaining limitations
 
-Alert policy application, notification receipt and the full alert delivery path
-still require separate verification. The [operations checklist](operations-checklist-vi.md#4-monitoring-và-thông-báo-email)
+Alert configuration was subsequently verified in the
+[normalized read-only inventory](monitoring-verification.md). Notification
+receipt and the full alert-delivery path remain unverified. The [operations checklist](operations-checklist-vi.md#4-monitoring-và-thông-báo-email)
 continues there; do not rerun deployment or load tests merely to populate evidence.
 The original 249/250 cloud load result and later 250/250 diagnostic remain separate.
 Client cold-start is still unconfirmed; no new latency/capacity or business-lift

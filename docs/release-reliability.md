@@ -5,7 +5,9 @@ pass. The subsequent single diagnostic run completed 250/250 requests with no
 observed errors; see the [recorded follow-up](cloud-verification-2026-10-26.md#single-bounded-diagnostic-follow-up-november-1-2026). It did not reproduce the
 original failed attempt. OIDC deployment/rollback subsequently passed in release
 attempt 3; see the [verified receipt summary](oidc-release-verification.md). Alert
-policy application and delivery remain unverified. The original cloud report, failed 5-client gate, and unconfirmed client
+configuration was subsequently verified by the normalized read-only inventory;
+email receipt and full alert-path delivery remain unverified. See the
+[monitoring evidence](monitoring-verification.md). The original cloud report, failed 5-client gate, and unconfirmed client
 cold start remain authoritative. The selected logistic weights and runtime image
 are unchanged. No held-out test, retraining or new recommendation policy is used.
 
@@ -153,7 +155,8 @@ The managed environment reports no outbound Google identity and no credential
 bindings. Its gcloud invocation selects an empty read-only credential directory;
 project/region variables alone provide no authorization. The later user-authorized Cloud Shell diagnostic is recorded separately. No
 direct Codex Google API access is claimed here. The later GitHub OIDC deployment
-and rollback receipts are verified in the separate report; alert changes and
-delivery tests remain pending. The user's authorized Cloud Shell and GitHub OIDC workflow
+and rollback receipts are verified in the separate report. Owner-applied alert
+configuration is verified from the normalized inventory; email receipt and full
+alert-path delivery tests remain pending. The user's authorized Cloud Shell and GitHub OIDC workflow
 remain the supported execution paths. No token or service-account key is needed
 in chat.
