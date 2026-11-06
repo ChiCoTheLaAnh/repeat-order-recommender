@@ -115,8 +115,11 @@ are demo diagnostics, not business SLAs or statistical drift alerts. Native
 latency, memory, startup, version and fallback signals stay on the dashboard.
 No fallback-rate alert is added: the synthetic unknown-query mix is deliberate.
 
-Select an existing **verified, enabled** notification channel resource in this
-project using the Cloud Console. No email addresses or channel credentials go
+Select an existing **enabled** notification channel resource in this project.
+If Google reports `UNVERIFIED`, complete verification first. Google treats an
+omitted/`VERIFICATION_STATUS_UNSPECIFIED` status as usable; this is not evidence
+of received mail. The collector reports usability and explicit verification
+separately. See [channel-status compatibility](monitoring-channel-status.md). No email addresses or channel credentials go
 into source. These commands do not create a contact or send a test message:
 
 ```bash

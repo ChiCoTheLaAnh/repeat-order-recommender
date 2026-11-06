@@ -1,4 +1,5 @@
 import importlib
+import json
 import unittest
 from unittest.mock import patch
 import httpx
@@ -54,3 +55,38 @@ class MonitoringTests(unittest.TestCase):
         self.assertFalse(result['notification_delivery_verified'])
         self.assertTrue(all(not item['filter_matches'] for item in result['log_metrics']))
         self.assertTrue(all(not item['enabled'] for item in result['alerts']))
+
+    def test_omitted_verification_status_allows_configuration_without_delivery_claim(self):
+        module=importlib.import_module('scripts.cloud_monitoring')
+        original=httpx.Client
+        def reply(request):
+            if request.method=='POST':
+                policy=json.loads(request.content)
+                self.assertEqual(policy['notificationChannels'],[
+                    'projects/project-c0e2b13a-3cea-47e9-aad/notificationChannels/123'])
+                return httpx.Response(200,json={'name':'projects/demo/alertPolicies/'+str(len(policy['displayName']))})
+            if request.url.path.endswith('/alertPolicies'):return httpx.Response(200,json={})
+            return httpx.Response(200,json={'type':'email','enabled':True})
+        def client(**kwargs):return original(**kwargs,transport=httpx.MockTransport(reply))
+        with patch.object(module.httpx,'Client',side_effect=client),patch.object(module,'gcloud',return_value='SYNTHETIC'):
+            result=module.apply_alerts('projects/project-c0e2b13a-3cea-47e9-aad/notificationChannels/123')
+        self.assertEqual(result['status'],'configured')
+        self.assertEqual(len(result['policies']),2)
+        self.assertTrue(result['channel_usable'])
+        self.assertFalse(result['channel_verified'])
+        self.assertEqual(result['channel_verification_status'],'VERIFICATION_STATUS_UNSPECIFIED')
+        self.assertFalse(result['notification_delivery_verified'])
+
+    def test_disabled_or_unknown_verification_state_is_rejected_before_write(self):
+        module=importlib.import_module('scripts.cloud_monitoring')
+        original=httpx.Client
+        for state in [{'verificationStatus':'VERIFIED','enabled':False},
+                      {'verificationStatus':'FUTURE_UNKNOWN','enabled':True}]:
+            def reply(request):
+                self.assertEqual(request.method,'GET')
+                return httpx.Response(200,json=state)
+            def client(**kwargs):return original(**kwargs,transport=httpx.MockTransport(reply))
+            with self.subTest(state=state),patch.object(module.httpx,'Client',side_effect=client), \
+                 patch.object(module,'gcloud',return_value='SYNTHETIC'):
+                with self.assertRaises(ValueError):
+                    module.apply_alerts('projects/project-c0e2b13a-3cea-47e9-aad/notificationChannels/123')
