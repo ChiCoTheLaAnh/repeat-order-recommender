@@ -3,8 +3,9 @@
 The implementation prepared operational verification without claiming a live
 pass. The subsequent single diagnostic run completed 250/250 requests with no
 observed errors; see the [recorded follow-up](cloud-verification-2026-10-26.md#single-bounded-diagnostic-follow-up-november-1-2026). It did not reproduce the
-original failed attempt. OIDC deployment/rollback and alert delivery remain
-unverified. The original cloud report, failed 5-client gate, and unconfirmed client
+original failed attempt. OIDC deployment/rollback subsequently passed in release
+attempt 3; see the [verified receipt summary](oidc-release-verification.md). Alert
+policy application and delivery remain unverified. The original cloud report, failed 5-client gate, and unconfirmed client
 cold start remain authoritative. The selected logistic weights and runtime image
 are unchanged. No held-out test, retraining or new recommendation policy is used.
 
@@ -54,7 +55,10 @@ creation was attempted and rejected with HTTP 403 by the GitHub integration;
 The first release attempt failed at OIDC authentication because the provider
 expected a legacy subject while GitHub uses immutable owner/repository IDs.
 See the [auth failure analysis](oidc-auth-failure.md); deployment/rollback were
-skipped and remain unverified. The provider resource must be
+skipped in that first attempt. After correcting subject format and enabling the
+Resource Manager API, attempt 3 passed deployment and real traffic rollback with
+both smoke checks; see the [verification report](oidc-release-verification.md).
+The provider resource must be
 read from Google configuration, not guessed from the project ID.
 
 After configuring the GitHub `historical-demo` environment and WIF variables,
@@ -145,7 +149,8 @@ samples remain unavailable, never zero or proof of a healthy service.
 The managed environment reports no outbound Google identity and no credential
 bindings. Its gcloud invocation selects an empty read-only credential directory;
 project/region variables alone provide no authorization. The later user-authorized Cloud Shell diagnostic is recorded separately. No
-OIDC deployments, rollback traffic switches, alert changes or delivery tests
-are claimed here. The user's authorized Cloud Shell and GitHub OIDC workflow
+direct Codex Google API access is claimed here. The later GitHub OIDC deployment
+and rollback receipts are verified in the separate report; alert changes and
+delivery tests remain pending. The user's authorized Cloud Shell and GitHub OIDC workflow
 remain the supported execution paths. No token or service-account key is needed
 in chat.

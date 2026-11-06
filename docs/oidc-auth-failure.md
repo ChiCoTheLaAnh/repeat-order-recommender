@@ -42,5 +42,14 @@ introduced. Frozen model/retrieval/cleaning/feature policies are unchanged.
 Apply the one-provider condition update through the user's authorized Cloud
 Shell using the [operations checklist](operations-checklist-vi.md#sửa-trust-format-sau-lần-oidc-bị-từ-chối),
 then confirm with its read-only preflight before one new release attempt. The
-provider update and successful OIDC/rollback still need live evidence. Do not
-mark authentication verified from these code changes or offline tests alone.
+owner subsequently applied that update; live OIDC/deployment/rollback evidence
+from attempt 3 is linked below. Code changes alone were not treated as proof.
+
+
+## Subsequent verified result
+
+The owner applied and read back the exact immutable condition. Attempt 2 passed
+OIDC, then hit the missing Resource Manager API during privacy preflight. After
+the owner enabled that API, attempt 3 completed deployment and real rollback.
+See the [verified receipt summary](oidc-release-verification.md). This document
+preserves the first failure; no additional provider update is now required.

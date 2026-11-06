@@ -214,10 +214,10 @@ are not evidence of customer behavior, sustained capacity or a reliability SLA.
    Keep its cause unresolved and the original failed gate visible; retain the
    sanitized collector for future naturally observed failures. Do not rerun
    solely to replace historical evidence.
-3. GitHub OIDC deployment and rollback have not been exercised by this manual
-   Cloud Shell run. The deployment receipt has no previous service to restore;
-   this is the first recorded revision. Existing documented CI/rollback steps
-   still require their own verification.
+3. The original manual Cloud Shell run did not exercise GitHub OIDC/rollback.
+   This gap was subsequently closed by [release attempt 3](oidc-release-verification.md):
+   revision 00002 was deployed, traffic returned to 00001, and both smoke checks
+   passed. Alert policy application and delivery still require verification.
 
 Keep the selected logistic model for this IAM-protected historical demo. Smoke
 equivalence verifies the serving implementation, not model quality or business

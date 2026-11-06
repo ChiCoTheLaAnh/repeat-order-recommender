@@ -89,6 +89,7 @@ def apply(project,region,output):
     c=config();metrics,_=write_definitions(output)
     gcloud('services','enable','run.googleapis.com','artifactregistry.googleapis.com','iam.googleapis.com',
         'iamcredentials.googleapis.com','sts.googleapis.com','logging.googleapis.com','monitoring.googleapis.com',
+        'cloudresourcemanager.googleapis.com',
         '--project',project)
     number=gcloud('projects','describe',project,json_output=True)['projectNumber']
     ensure(['artifacts','repositories','describe',c['repository'],'--location',region,'--project',project],

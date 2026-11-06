@@ -159,5 +159,20 @@ class GithubIdentityTrustTests(unittest.TestCase):
         self.assertNotIn("assertion.sub.startsWith",condition)
 
 
+class BootstrapPrerequisiteTests(unittest.TestCase):
+    def test_resource_manager_api_enabled_before_ancestor_privacy_checks(self):
+        bootstrap=importlib.import_module('scripts.bootstrap_cloud')
+        class StopAfterEnable(Exception):pass
+        calls=[]
+        def google(*args,**kwargs):
+            calls.append(args)
+            raise StopAfterEnable()
+        with tempfile.TemporaryDirectory() as temporary,patch.object(bootstrap,'gcloud',side_effect=google):
+            with self.assertRaises(StopAfterEnable):
+                bootstrap.apply('project-c0e2b13a-3cea-47e9-aad','us-central1',Path(temporary))
+        self.assertEqual(calls[0][:2],('services','enable'))
+        self.assertIn('cloudresourcemanager.googleapis.com',calls[0])
+
+
 if __name__=='__main__':
     unittest.main()

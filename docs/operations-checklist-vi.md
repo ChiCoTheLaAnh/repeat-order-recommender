@@ -17,6 +17,13 @@
 - Codex chưa có Google identity. Việc sửa provider vẫn cần Cloud Shell của m;
   không có deploy/rollback hoặc alert-delivery pass mới nào được suy ra từ CI.
 
+**Cập nhật:** attempt 3 đã deploy revision `00002-svx`, rollback thực sự về
+`00001-2jz` và pass cả hai smoke checks. Xem [receipts đã kiểm chứng](oidc-release-verification.md).
+Attempt 2 đã qua OIDC nhưng cần bật Resource Manager API cho ancestor privacy
+check; API đã được owner bật và kiểm tra lại dưới deployer impersonation.
+Các ghi chú attempt 1 ở trên là lịch sử lỗi, không phải trạng thái cuối cùng.
+**Không chạy lại bước sửa provider/deploy; tiếp tục mục 4 về monitoring.**
+
 Không tạo key, không dán token vào chat, không cấp Owner để vượt lỗi. Không chạy
 lại load test, build bundle hoặc retrain model. Giữ nguyên checkout/bundle gốc
 `$HOME/repeat-order-recommender-release-b4accd8`.
