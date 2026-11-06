@@ -1378,3 +1378,27 @@ rollback rehearsal, and prepares scoped infrastructure alerts. Run the
 load testing. It records sanitized setup/warmup failures and preserves the
 original 1/250 failure; no new live pass is implied. The frozen model, image,
 recommendation policies and unopened test split are unchanged.
+
+### Operational handoff and interview walkthrough
+
+The Vietnamese [operations checklist](docs/operations-checklist-vi.md) gives
+Cloud Shell preflight, exact GitHub environment/variable setup, one OIDC
+rollback rehearsal and separate monitoring/delivery acceptance criteria.
+The current integration cannot create the GitHub environment (HTTP 403), and
+the owner configured the environment and completed OIDC deployment/rollback
+verification in attempt 3. Alert delivery remains pending. The earlier immutable-
+subject mismatch is documented in the [auth failure analysis](docs/oidc-auth-failure.md).
+PR #4 was merged after passing CI, preserving both cloud load observations.
+
+The [2–3 minute interview walkthrough](docs/interview-demo-vi.md) includes an
+architecture diagram, evidence checklist, measured model/cloud results and
+explicit limitations. Its status table distinguishes implemented tooling from
+live verified behavior; no production or business-lift claim is implied.
+
+
+The [OIDC release verification](docs/oidc-release-verification.md) records the
+successful third workflow attempt: deploy revision `00002-svx`, restore 100%
+traffic to `00001-2jz`, and pass both smoke checks. The image/model are unchanged;
+this verifies rollback between distinct revisions of the frozen release.
+Monitoring alert delivery remains pending. Earlier auth/API failures and both
+historical load observations remain recorded rather than replaced.

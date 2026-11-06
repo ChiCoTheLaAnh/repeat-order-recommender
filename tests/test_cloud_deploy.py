@@ -148,5 +148,31 @@ class DeployableBundleTests(release_fixtures.ReleaseTests):
         self.assertFalse((self.root/'absent-repository/.cache').exists())
 
 
+class GithubIdentityTrustTests(unittest.TestCase):
+    def test_immutable_subject_keeps_repository_branch_and_environment_restrictions(self):
+        bootstrap=importlib.import_module('scripts.bootstrap_cloud')
+        condition=bootstrap.github_attribute_condition()
+        self.assertEqual(condition,
+            "assertion.repository_id == '1406464839' && assertion.ref == 'refs/heads/main' && "
+            "assertion.sub == 'repo:ChiCoTheLaAnh@185126752/repeat-order-recommender@1406464839:environment:historical-demo'")
+        self.assertNotIn(' || ',condition)
+        self.assertNotIn("assertion.sub.startsWith",condition)
+
+
+class BootstrapPrerequisiteTests(unittest.TestCase):
+    def test_resource_manager_api_enabled_before_ancestor_privacy_checks(self):
+        bootstrap=importlib.import_module('scripts.bootstrap_cloud')
+        class StopAfterEnable(Exception):pass
+        calls=[]
+        def google(*args,**kwargs):
+            calls.append(args)
+            raise StopAfterEnable()
+        with tempfile.TemporaryDirectory() as temporary,patch.object(bootstrap,'gcloud',side_effect=google):
+            with self.assertRaises(StopAfterEnable):
+                bootstrap.apply('project-c0e2b13a-3cea-47e9-aad','us-central1',Path(temporary))
+        self.assertEqual(calls[0][:2],('services','enable'))
+        self.assertIn('cloudresourcemanager.googleapis.com',calls[0])
+
+
 if __name__=='__main__':
     unittest.main()
