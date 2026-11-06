@@ -225,3 +225,10 @@ __marimo__/
 
 # Ephemeral GitHub OIDC credentials (never service-account keys).
 gha-creds-*.json
+
+# Static demo dependencies, build and browser artifacts
+/web/node_modules/
+/web/dist/
+/web/test-results/
+/web/playwright-report/
+/web/*.tsbuildinfo
