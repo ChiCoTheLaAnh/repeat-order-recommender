@@ -50,8 +50,11 @@ exception class. There is no retry-until-success loop.
 For the actual setup status and copy-paste Cloud Shell checks, follow the
 [Vietnamese operations checklist](operations-checklist-vi.md). Environment
 creation was attempted and rejected with HTTP 403 by the GitHub integration;
-`historical-demo` and its variables must be configured by the repository admin.
-The release workflow has not yet been executed. The provider resource must be
+`historical-demo` and its variables were subsequently configured by the owner.
+The first release attempt failed at OIDC authentication because the provider
+expected a legacy subject while GitHub uses immutable owner/repository IDs.
+See the [auth failure analysis](oidc-auth-failure.md); deployment/rollback were
+skipped and remain unverified. The provider resource must be
 read from Google configuration, not guessed from the project ID.
 
 After configuring the GitHub `historical-demo` environment and WIF variables,

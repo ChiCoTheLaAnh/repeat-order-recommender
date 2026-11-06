@@ -5,17 +5,41 @@
 - PR #4 đã review và merge vào `main`, merge commit
   `2b21696656722163e9f9b2c41f60a031e9ea2251`; CI của PR đã pass.
 - Diagnostic duy nhất đã hoàn tất 250/250 request; giữ nguyên lỗi 1/250 của lần cũ.
-- GitHub chưa có environment `historical-demo` tại lần kiểm tra này. API tạo
-  environment trả HTTP 403 `Resource not accessible by integration`. Tài khoản
-  có repository admin nhưng integration hiện tại thiếu quyền Environments write;
-  quyền account không đồng nghĩa quyền integration.
-- Chưa có workflow release nào được chạy. Google identity của Codex chưa được
-  cấu hình. Không có deploy/rollback, alert application hoặc email-delivery pass
-  mới nào được suy ra từ CI. Các bước dưới đây cần m thực hiện bằng quyền của m.
+- Owner đã tạo `historical-demo`; API xác nhận custom deployment branch policy
+  chỉ cho branch `main`. Bốn variables đã được owner cấu hình; integration không
+  có quyền đọc độc lập toàn bộ values hoặc sửa environment (HTTP 403).
+- Release run `42149437150` dừng ở bước Google authentication: WIF từ chối
+  attribute condition. Các bước deploy/smoke/rollback đều bị skip, chưa đổi service.
+- GitHub OIDC settings xác nhận immutable subject có prefix
+  `repo:ChiCoTheLaAnh@185126752/repeat-order-recommender@1406464839`; provider
+  trước đó kiểm tra legacy subject không có IDs. Đây là lỗi trust-format,
+  không phải warning Node20 và không phải model failure.
+- Codex chưa có Google identity. Việc sửa provider vẫn cần Cloud Shell của m;
+  không có deploy/rollback hoặc alert-delivery pass mới nào được suy ra từ CI.
 
 Không tạo key, không dán token vào chat, không cấp Owner để vượt lỗi. Không chạy
 lại load test, build bundle hoặc retrain model. Giữ nguyên checkout/bundle gốc
 `$HOME/repeat-order-recommender-release-b4accd8`.
+
+## Sửa trust-format sau lần OIDC bị từ chối
+
+Đã đọc thông báo lỗi từ GitHub check annotation và cấu hình OIDC repository,
+không lấy hoặc in token. Google condition cần khớp immutable subject mà GitHub
+đang phát hành. Trong Cloud Shell đã xác thực, cập nhật **chỉ** attribute condition:
+
+```bash
+gcloud iam workload-identity-pools providers update-oidc github \
+  --workload-identity-pool=github-repeat-demo \
+  --location=global \
+  --project=project-c0e2b13a-3cea-47e9-aad \
+  --attribute-condition="assertion.repository_id == '1406464839' && assertion.ref == 'refs/heads/main' && assertion.sub == 'repo:ChiCoTheLaAnh@185126752/repeat-order-recommender@1406464839:environment:historical-demo'"
+```
+
+Giữ nguyên ba ràng buộc repository ID, main ref và exact environment subject;
+không bỏ condition, không thêm legacy OR fallback và không đổi mapping/IAM roles.
+Chạy preflight chỉ đọc ở bước 1 để xác nhận giá trị đã lưu. Sau khi preflight đạt,
+chạy **một** workflow mới với cùng approved inputs và rehearsal bật. Lưu cả run
+bị từ chối, không thay thế nó bằng run mới. Nếu gặp lỗi khác thì dừng để phân tích.
 
 ## 1. Lấy cấu hình thật từ Cloud Shell — chỉ đọc
 
@@ -57,8 +81,9 @@ try:
     provider=gcloud('iam','workload-identity-pools','providers','describe',c['wif_provider'],
         '--workload-identity-pool',c['wif_pool'],'--location=global','--project',project,json_output=True)
     expected_name=f'projects/{number}/locations/global/workloadIdentityPools/{c["wif_pool"]}/providers/{c["wif_provider"]}'
+    # Standalone so an older clean operator checkout can run this read-only check.
     expected_condition=("assertion.repository_id == '1406464839' && assertion.ref == 'refs/heads/main' && "
-        "assertion.sub == 'repo:"+c['github_repository']+":environment:"+c['github_environment']+"'")
+        "assertion.sub == 'repo:ChiCoTheLaAnh@185126752/repeat-order-recommender@1406464839:environment:historical-demo'")
     if (provider['name']!=expected_name or provider.get('disabled')
         or provider.get('attributeCondition')!=expected_condition
         or provider.get('oidc',{}).get('issuerUri')!='https://token.actions.githubusercontent.com'
@@ -128,8 +153,9 @@ và `workflow_inputs` ở output cho hai bước tiếp theo. Provider được 
    người đó phải thực sự có thể approve. Không cấu hình chờ vô hạn cho tài khoản
    chỉ có một người.
 
-Integration hiện tại không tạo environment được (HTTP 403), nên bước UI này
-là việc m cần làm bằng account admin. Không cần thay token hoặc đưa key cho Codex.
+Owner đã hoàn thành bước tạo environment và main-only rule. Chỉ review lại
+values nếu cần; không tạo environment khác. Integration vẫn không có quyền ghi
+environment (HTTP 403), nên mọi thay đổi UI cần account admin. Không cần thay token hoặc đưa key cho Codex.
 
 ## 3. Chạy deploy và rollback đúng một lần
 

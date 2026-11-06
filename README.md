@@ -1385,7 +1385,9 @@ The Vietnamese [operations checklist](docs/operations-checklist-vi.md) gives
 Cloud Shell preflight, exact GitHub environment/variable setup, one OIDC
 rollback rehearsal and separate monitoring/delivery acceptance criteria.
 The current integration cannot create the GitHub environment (HTTP 403), and
-live OIDC/rollback/alert verification remains pending user-authorized setup.
+live OIDC/rollback/alert verification remains pending. The owner configured the
+environment; the first OIDC attempt hit an immutable-subject trust mismatch,
+documented in the [auth failure analysis](docs/oidc-auth-failure.md).
 PR #4 was merged after passing CI, preserving both cloud load observations.
 
 The [2–3 minute interview walkthrough](docs/interview-demo-vi.md) includes an

@@ -8,6 +8,19 @@ from .audit_raw import ROOT
 from .cloud_deploy import config,gcloud,request_log_filter,PRIVACY_EXCLUSION
 
 
+def github_attribute_condition():
+    """Exact immutable subject observed from this repository's OIDC settings.
+
+    Owner/repository IDs survive GitHub's immutable-subject rollout. Preserve
+    repository ID, main ref, and environment checks; do not broaden the trust.
+    """
+    c=config()
+    owner,repository=c['github_repository'].split('/',1)
+    subject=f'repo:{owner}@185126752/{repository}@1406464839:environment:{c["github_environment"]}'
+    return ("assertion.repository_id == '1406464839' && assertion.ref == 'refs/heads/main' && "
+            "assertion.sub == '"+subject+"'")
+
+
 def definitions():
     c=config();service=c['service']
     prefix=f'resource.type="cloud_run_revision" AND resource.labels.service_name="{service}" '
@@ -102,8 +115,7 @@ def apply(project,region,output):
     ensure(['iam','workload-identity-pools','describe',c['wif_pool'],'--location=global','--project',project],
         ['iam','workload-identity-pools','create',c['wif_pool'],'--location=global','--project',project,
          '--display-name=GitHub historical recommendation demo'])
-    condition=("assertion.repository_id == '1406464839' && assertion.ref == 'refs/heads/main' && "
-               "assertion.sub == 'repo:"+c['github_repository']+":environment:"+c['github_environment']+"'")
+    condition=github_attribute_condition()
     provider=ensure(['iam','workload-identity-pools','providers','describe',c['wif_provider'],
         '--workload-identity-pool',c['wif_pool'],'--location=global','--project',project],
         ['iam','workload-identity-pools','providers','create-oidc',c['wif_provider'],

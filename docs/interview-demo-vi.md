@@ -11,7 +11,7 @@
 | Original five-client cloud run | Có một lỗi chưa rõ nguyên nhân | 249/250 thành công, p95 27,125 ms; giữ failed zero-error gate |
 | Single instrumented follow-up | Đạt trong mẫu đo mới | 250/250, p95 22,310 ms, khoảng 5,043 s; không tái hiện lỗi cũ |
 | Offline CI | Đã pass | 107 tests và Docker build ở PR #3; CI PR #4 cũng pass trước merge |
-| GitHub OIDC deployment và rollback | Chưa xác minh live | Workflow/runbook đã có; environment creation bị integration từ chối HTTP 403; chưa có release run |
+| GitHub OIDC deployment và rollback | Chưa xác minh live | Environment đã tạo; release run đầu bị WIF từ chối immutable subject; deploy/rollback bị skip |
 | Alert policies / email delivery / full alert path | Chưa xác minh live | Tooling đã có; ba mức cần bằng chứng riêng |
 | Client cold-start | Chưa xác nhận | Không có fresh explicit zero-instance evidence trước request |
 | Business lift | Chưa đo | Không có A/B test, revenue/conversion attribution hoặc recommendation exposure data |
@@ -67,7 +67,7 @@ Discovery còn yếu, cold-start chưa xác nhận và held-out model test chưa
 **2:45–3:00 — Cập nhật vận hành theo bằng chứng**
 
 Hiện nói: “Em đã chuẩn bị OIDC deployment, rollback rehearsal và alert tooling;
-phần xác minh live đang bị chặn ở cấu hình GitHub environment và cloud access.”
+run OIDC đầu tiên bị chặn do trust condition dùng subject format cũ; em đã xác định mismatch và chuẩn bị bản sửa, chưa xác nhận deploy/rollback live.”
 Sau khi có receipts đủ điều kiện, thay câu này bằng revision/run ID thực tế và
 kết quả khôi phục 100% traffic + smoke. Với monitoring, nói chính xác mức đã
 kiểm chứng; chưa nhận email thì không nói alert delivery đã hoạt động.
