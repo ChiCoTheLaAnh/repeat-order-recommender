@@ -90,3 +90,33 @@ class MonitoringTests(unittest.TestCase):
                  patch.object(module,'gcloud',return_value='SYNTHETIC'):
                 with self.assertRaises(ValueError):
                     module.apply_alerts('projects/project-c0e2b13a-3cea-47e9-aad/notificationChannels/123')
+
+    def test_inventory_treats_omitted_numeric_zero_as_default_but_rejects_real_drift(self):
+        module=importlib.import_module('scripts.cloud_monitoring')
+        original=httpx.Client
+        channel='projects/project-c0e2b13a-3cea-47e9-aad/notificationChannels/123'
+        common='resource.type="cloud_run_revision" AND resource.labels.service_name="repeat-order-historical-demo" AND resource.labels.location="us-central1"'
+        for change,expected in [(None,True),({'thresholdValue':0},True),({'thresholdValue':1},False),
+                ({'comparison':'COMPARISON_LT'},False),({'duration':'300s'},False),
+                ({'filter':'wrong-service'},False),({'thresholdValue':False},False)]:
+            actual=[]
+            for title,metric,extra in [('Historical demo: service 5xx','run.googleapis.com/request_count',' AND metric.labels.response_code_class="5xx"'),
+                    ('Historical demo: bundle load failed','logging.googleapis.com/user/repeat_demo_startup_failures','')]:
+                threshold={'filter':common+' AND metric.type="'+metric+'"'+extra,
+                    'comparison':'COMPARISON_GT','duration':'0s','trigger':{'count':1},
+                    'aggregations':[{'alignmentPeriod':'300s','perSeriesAligner':'ALIGN_SUM','crossSeriesReducer':'REDUCE_SUM'}]}
+                actual.append({'displayName':title,'enabled':True,'notificationChannels':[channel],
+                    'conditions':[{'conditionThreshold':threshold}]})
+            if change:actual[0]['conditions'][0]['conditionThreshold'].update(change)
+            def reply(request):
+                self.assertEqual(request.method,'GET')
+                if request.url.path.endswith('/alertPolicies'):return httpx.Response(200,json={'alertPolicies':actual})
+                if request.url.path.endswith('/dashboards'):return httpx.Response(200,json={})
+                return httpx.Response(200,json={'enabled':True})
+            def client(**kwargs):return original(**kwargs,transport=httpx.MockTransport(reply))
+            def google(*args,**kwargs):return 'SYNTHETIC' if args[:2]==('auth','print-access-token') else {}
+            with self.subTest(change=change),patch.object(module.httpx,'Client',side_effect=client),patch.object(module,'gcloud',side_effect=google):
+                result=module.inspect_monitoring(channel)
+            self.assertEqual(result['alerts'][0]['condition_matches'],expected)
+            self.assertTrue(result['alerts'][1]['condition_matches'])
+            self.assertFalse(result['notification_delivery_verified'])

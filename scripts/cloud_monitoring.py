@@ -95,6 +95,17 @@ def apply_alerts(channel):
             'note':'Usable channel configuration is not an end-to-end notification test'}
 
 
+def threshold_matches(actual,expected):
+    """Proto3 double threshold_value defaults to zero when JSON omits it.
+
+    Normalize only this observed numeric default; preserve all other drift.
+    """
+    if not isinstance(actual,dict):return False
+    value=actual.get('thresholdValue',0)
+    if isinstance(value,bool) or not isinstance(value,(int,float)):return False
+    return {**actual,'thresholdValue':value}=={**expected,'thresholdValue':expected.get('thresholdValue',0)}
+
+
 def inspect_monitoring(channel):
     """Inventory only: existence is not sample availability or notification delivery."""
     expected=alert_policies(channel);parent='projects/'+config()['project']
@@ -114,7 +125,8 @@ def inspect_monitoring(channel):
         thresholds=[c.get('conditionThreshold') for c in actual.get('conditions',[])]
         alerts.append({'display_name':policy['displayName'],'unique':len(matches)==1,
             'enabled':actual.get('enabled') is True,'channel_matches':actual.get('notificationChannels')==[channel],
-            'condition_matches':thresholds==[policy['conditions'][0]['conditionThreshold']]})
+            'condition_matches':len(thresholds)==1 and threshold_matches(
+                thresholds[0],policy['conditions'][0]['conditionThreshold'])})
     return {'status':'inventory_only','log_metrics':checks,'alerts':alerts,
         'dashboard_present':any(d.get('displayName')=='Historical recommendation demo — operational metrics' for d in dashboards),
         **channel_status(channel_state),
