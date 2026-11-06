@@ -48,6 +48,20 @@ Chạy preflight chỉ đọc ở bước 1 để xác nhận giá trị đã l�
 chạy **một** workflow mới với cùng approved inputs và rehearsal bật. Lưu cả run
 bị từ chối, không thay thế nó bằng run mới. Nếu gặp lỗi khác thì dừng để phân tích.
 
+## Cập nhật sau khi hoàn tất monitoring configuration
+
+Owner đã tạo email channel và áp dụng cả hai alert. Báo cáo normalized mới xác
+nhận conditions/channel/enabled/uniqueness đều khớp, bốn metric filters/extractors
+khớp và dashboard tồn tại; xem [bằng chứng](monitoring-verification.md).
+Không chạy lại apply, deploy hoặc inspect chỉ để tạo thêm một pass. Trong giao
+diện Email đã xem không có nút Test; giữ email receipt/full alert path là chưa
+xác minh và dừng tìm nút trong giao diện đó. Không dùng verification-code flow
+hoặc lỗi dịch vụ giả để thay cho test notification.
+
+Việc còn lại là tập walkthrough và review chi phí/quyền hiện tại chỉ đọc trong
+[demo-ready checklist](demo-ready-checklist-vi.md). Các bước setup bên dưới được
+giữ làm runbook/history, không phải yêu cầu m thực hiện lại từ đầu.
+
 ## 1. Lấy cấu hình thật từ Cloud Shell — chỉ đọc
 
 Mở Cloud Shell của project `project-c0e2b13a-3cea-47e9-aad`. Khối này cập nhật

@@ -10,9 +10,11 @@
 | Manual Cloud Run deployment | Đã kiểm chứng | IAM-protected historical demo; deployment receipt và smoke report đã ghi |
 | Original five-client cloud run | Có một lỗi chưa rõ nguyên nhân | 249/250 thành công, p95 27,125 ms; giữ failed zero-error gate |
 | Single instrumented follow-up | Đạt trong mẫu đo mới | 250/250, p95 22,310 ms, khoảng 5,043 s; không tái hiện lỗi cũ |
-| Offline CI | Đã pass | 107 tests và Docker build ở PR #3; CI PR #4 cũng pass trước merge |
+| Offline CI | Đã pass | 112 tests tại collector fix và CI PR #6 pass trước merge |
 | GitHub OIDC deployment và rollback | Đã xác minh live | Attempt 3: revision 00001 → 00002 → 00001, changed_traffic true, smoke cả hai revision pass; xem OIDC verification report |
-| Alert policies / email delivery / full alert path | Chưa xác minh live | Tooling đã có; ba mức cần bằng chứng riêng |
+| Alert configuration | Đã xác minh từ owner read-only receipt | Hai alert enabled, unique, channel/conditions khớp; bốn filters/extractors khớp; dashboard tồn tại |
+| Email delivery / full alert path | Chưa xác minh | UI email channel hiện tại không có test button; không gây lỗi để thử |
+| Chi phí và quyền hiện tại | Chưa kiểm tra live trong đợt chốt | Receipt cũ ghi min 0/max 1 và IAM auth; cần owner xem Console/Billing, không suy ra $0 |
 | Client cold-start | Chưa xác nhận | Không có fresh explicit zero-instance evidence trước request |
 | Business lift | Chưa đo | Không có A/B test, revenue/conversion attribution hoặc recommendation exposure data |
 | Final held-out model evaluation | Chưa làm | Test snapshot descriptive statistics đã có từ giai đoạn đầu; chưa dùng test để đánh giá model/tuning |
@@ -68,8 +70,8 @@ Discovery còn yếu, cold-start chưa xác nhận và held-out model test chưa
 
 Hiện nói: “Em đã xác minh deploy qua GitHub OIDC và rollback giữa hai revision
 của cùng frozen image. Run 42149437150 attempt 3 deploy revision 00002, trả 100%
-traffic về 00001 và smoke cả hai bước đều pass. Alert tooling đã có nhưng
-notification delivery vẫn cần kiểm chứng.” Xem [bằng chứng](oidc-release-verification.md);
+traffic về 00001 và smoke cả hai bước đều pass. Hai alert đã cấu hình đúng;
+email receipt và toàn bộ đường cảnh báo vẫn chưa xác minh.” Xem [bằng chứng](oidc-release-verification.md);
 không nói đã khôi phục model khác hoặc đã kiểm chứng mọi tình huống sự cố.
 
 ## Sơ đồ và bằng chứng để mở khi trình bày
@@ -95,8 +97,8 @@ Chuẩn bị bốn màn hình/file, không cần thêm request load:
 1. **README:** data funnel, validation model table và logistic–XGBoost comparison.
 2. **Cloud verification report:** cả lượt 249/250 và lượt 250/250; nêu sample
    duration, concurrency và client-network boundary, giữ cold-start null.
-3. **GitHub Actions:** offline CI pass. Sau khi OIDC rehearsal thực sự chạy,
-   thêm release run và receipts chứng minh distinct revisions + rollback smoke.
+3. **GitHub Actions:** offline CI pass; mở release run 42149437150 attempt 3 và
+   receipts chứng minh distinct revisions + rollback smoke.
 4. **Dashboard/monitoring:** screenshots có timestamp/window, release/model và
    metrics thực sự quan sát; che email/customer IDs/raw URLs. Hiện chưa có
    verified alert-delivery screenshot, không dùng ảnh mẫu để lấp chỗ trống.
@@ -119,7 +121,13 @@ Không upload model bundle, customer lookup, ID-bearing labels hoặc email thô
 | Coverage trade-off | Mean monthly coverage@10 giảm từ heuristic 56,85% xuống logistic 34,05% |
 | No-purchase customers | 76,36% validation queries không có future purchases; primary ranking metrics không đo utility cho nhóm này |
 
-Nếu hỏi “Tiếp theo em làm gì?”, trả lời: “Hoàn tất OIDC/rollback và monitoring
-verification; sau đó mới thiết kế challenger evaluation trên cửa sổ thời gian
-mới, chờ labels mature và giữ original test frozen.” Không hứa tăng conversion
+Nếu hỏi “Tiếp theo em làm gì?”, trả lời: “Em đã xác minh OIDC/rollback và alert
+configuration. Em giữ email/full alert-path delivery ở trạng thái chưa xác minh,
+review chi phí/quyền hiện tại trước demo, rồi mới lập kế hoạch challenger trên
+cửa sổ thời gian mới, chờ labels mature và giữ original test frozen.” Không hứa tăng conversion
 hoặc throughput vượt những gì đã đo.
+
+
+Bốn bằng chứng và các bước review chi phí/quyền chỉ đọc nằm trong
+[demo-ready checklist](demo-ready-checklist-vi.md). Monitoring summary và hashes:
+[monitoring verification](monitoring-verification.md).

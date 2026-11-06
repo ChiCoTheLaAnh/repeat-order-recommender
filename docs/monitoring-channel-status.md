@@ -63,3 +63,12 @@ No policy is edited by this fix. Re-run only the read-only `inspect` operation
 into a new receipt, preserving the original false-flag report. Configuration
 compatibility and dashboard existence remain separate from exported sample
 availability, email receipt and end-to-end alert testing, which are unverified.
+
+
+## Follow-up inventory completed
+
+The owner supplied the new normalized receipt; both conditions now match,
+without any policy reapply. Its SHA256, all checked fields, retained original
+receipt and unverified delivery/sample-availability limits are summarized in
+[monitoring verification](monitoring-verification.md). No further re-inspection
+is required solely to obtain another pass.
