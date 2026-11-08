@@ -105,3 +105,41 @@ test("keyboard, product history, methodology and repository assets", async ({
     fullPage: true,
   });
 });
+
+test("shopping comparison is real, profile-specific and absent for a guest", async ({
+  page,
+}) => {
+  await page.goto("");
+  await expect(
+    page.getByRole("heading", {
+      name: "Your customer is back. What should you show them?",
+    }),
+  ).toBeVisible();
+  const comparison = page.getByRole("region", {
+    name: "Bestseller and personalized comparison",
+  });
+  await expect(comparison).toBeVisible();
+  const popular = page.getByRole("region", {
+    name: "Bestsellers for everyone",
+  });
+  const personal = page.getByRole("region", {
+    name: "Personalized for selected shopper",
+  });
+  await expect(popular.locator("li")).toHaveCount(5);
+  await expect(personal.locator("li")).toHaveCount(5);
+  const originalPopular = await popular.locator("li").allTextContents();
+  await expect(comparison).toContainText(
+    "0 of 5 products appear in both lists.",
+  );
+  for (const p of demo.profiles.filter((p) => p.mode === "personalized")) {
+    await page.getByRole("button", { name: new RegExp(p.label) }).click();
+    expect(await popular.locator("li").allTextContents()).toEqual(
+      originalPopular,
+    );
+    await expect(personal.locator("li").first()).toContainText(
+      `SKU ${p.recommendations[0].sku}`,
+    );
+  }
+  await page.getByRole("button", { name: /Unknown customer/ }).click();
+  await expect(comparison).toHaveCount(0);
+});

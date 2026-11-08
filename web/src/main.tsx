@@ -10,6 +10,7 @@ import {
   type Item,
 } from "./data";
 import "./style.css";
+import { Comparison } from "./Comparison";
 function Activity({ profile }: { profile: Profile }) {
   const [tip, setTip] = useState("");
   const max = Math.max(1, ...profile.monthly.map((m) => m.invoiceCount));
@@ -211,14 +212,15 @@ function App() {
             <span className="status-dot" /> HISTORICAL RECOMMENDATION DEMO
           </div>
           <h1>
-            A familiar favourite.
+            Your customer is back.
             <br />
-            <span>A little discovery.</span>
+            <span>What should you show them?</span>
           </h1>
           <p>
-            Explore what a repeat-first recommender would suggest next.
-            <br className="desktop-break" /> Real retail history. A frozen
-            model. Five ways to look inside.
+            Imagine the “Buy again” section of a shop. Help a returning customer
+            find familiar products without starting from scratch.
+            <br className="desktop-break" /> Choose a shopper below and compare
+            a bestseller shelf with their personalized picks.
           </p>
           <div className="date-note">
             Past-only data{" "}
@@ -279,7 +281,7 @@ function App() {
                       <span>since purchase</span>
                     </div>
                   </div>
-                  <Activity profile={p} />
+                  <Activity key={p.id} profile={p} />
                 </>
               ) : (
                 <p className="guest-note">
@@ -363,6 +365,10 @@ function App() {
                 </div>
               </div>
             )}
+            <Comparison data={data} profile={p} />
+            <div className="section-label card-list-label">
+              {guest ? "POPULAR PRODUCTS" : "EXPLORE THE PERSONALIZED LIST"}
+            </div>
             <div className="products">
               {topItems(p, k).map((item) => (
                 <Product key={p.id + item.sku} item={item} guest={guest} />

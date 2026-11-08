@@ -81,3 +81,11 @@ The connected GitHub integration could create/review code changes but returned *
 - Frontend: three unit tests passed; production TypeScript/Vite build passed. Six Chromium browser checks passed across desktop (1280×720) and phone (390×664 CSS viewport), including every profile's top result and repeat/new badges against the export. This is Chromium with mobile emulation, not a claim of real-device Safari testing.
 - Screenshots were visually inspected at desktop and mobile widths. Smaller labels were darkened after independent review. SVG bars offer hover/focus values and an equivalent data table; repeat/new counts are also readable as text. Motion is not required and reduced-motion preferences are respected.
 - No model fit, final-test evaluation, cloud load test or Cloud Run deployment was performed for the website.
+
+## Returning-shopper comparison
+
+The opening scenario is a shop's “Buy again” shelf. A collapsible side-by-side comparison displays the **first five** already-exported popularity fallback products and the selected shopper's first five model results. Popularity means distinct identified purchasers over the preceding 30 days, not revenue or unit sales. The global shelf stays fixed when profiles change; the personalized shelf follows the selected profile. The existing Top 5/10/20 control applies to the detailed product cards below, not this fixed-five comparison.
+
+The shared-product count is the size of the intersection of those two five-SKU sets; it ignores rank matches. It describes different product choices, not recommendation quality, future purchases or business lift. Only the personalized column carries verified past-purchase badges. Baseline products have no invented per-customer history classification. Unknown customers have no personalized comparison.
+
+This presentation reuses the existing public JSON without changing a byte (the SHA256 above remains valid). No export, model, retrieval policy, inference endpoint, target labels or dataset changes are required. Six frontend unit tests and eight desktop/mobile browser checks pass for the revised UI, including prefix preservation, stable global popularity, profile-specific results and unknown-mode exclusion.

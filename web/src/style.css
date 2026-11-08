@@ -837,3 +837,197 @@ footer > a:last-child {
     align-items: center;
   }
 }
+/* A concrete shopping decision, using the release's two existing lists. */
+.hero h1 {
+  font-size: clamp(38px, 4.4vw, 60px);
+  letter-spacing: -2.8px;
+}
+.hero > p {
+  max-width: 790px;
+}
+.shopping-comparison {
+  margin: 0 0 30px;
+  border: 1px solid #d7e0ef;
+  border-radius: 12px;
+  background: white;
+  padding: 21px;
+}
+.shopping-comparison summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  list-style: none;
+}
+.shopping-comparison summary > span {
+  font-size: 23px;
+  color: #2856d8;
+}
+.shopping-comparison details[open] summary > span {
+  transform: rotate(45deg);
+}
+.shopping-comparison h3 {
+  font-size: 19px;
+  line-height: 1.4;
+  letter-spacing: -0.5px;
+  margin: 8px 0 0;
+}
+.comparison-intro,
+.comparison-limit {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #596a83;
+}
+.comparison-intro {
+  margin: 15px 0 20px;
+}
+.shelves {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.shelves section {
+  min-width: 0;
+  border: 1px solid #e2e7f0;
+  border-radius: 9px;
+  overflow: hidden;
+}
+.shelves .personal-shelf {
+  border-color: #bdcff7;
+}
+.shelf-heading {
+  padding: 17px 14px;
+  background: #f5f7fb;
+  border-bottom: 1px solid #e2e7f0;
+  min-height: 114px;
+}
+.personal-shelf .shelf-heading {
+  background: #eef3ff;
+}
+.shelf-heading > span {
+  font-size: 9px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  color: #596a83;
+}
+.personal-shelf .shelf-heading > span {
+  color: #2856d8;
+}
+.shelf-heading h4 {
+  font-size: 14px;
+  margin: 8px 0 4px;
+}
+.shelf-heading p {
+  font-size: 10px;
+  margin: 0;
+  color: #596a83;
+}
+.shelves ol {
+  list-style: none;
+  margin: 0;
+  padding: 0 14px;
+}
+.shelves li {
+  display: flex;
+  gap: 9px;
+  min-height: 106px;
+  padding: 15px 0;
+  border-bottom: 1px solid #e7ebf1;
+}
+.shelves li:last-child {
+  border: 0;
+}
+.shelf-rank {
+  font-size: 11px;
+  color: #596a83;
+  min-width: 12px;
+  padding-top: 1px;
+}
+.shelves li strong {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  display: block;
+  text-transform: capitalize;
+}
+.shelves li small {
+  display: block;
+  font-size: 9px;
+  line-height: 1.6;
+  color: #596a83;
+  margin-top: 5px;
+}
+.shelf-history {
+  display: block;
+  color: #2856d8;
+}
+.shelf-takeaway {
+  font-size: 12px;
+  color: #596a83;
+  line-height: 1.8;
+  margin: 19px 0 7px;
+}
+.shelf-takeaway strong {
+  color: #253d6a;
+}
+.comparison-limit {
+  font-size: 10px;
+  margin: 0;
+}
+.card-list-label {
+  margin: 0 0 15px;
+}
+@media (max-width: 640px) {
+  .hero h1 {
+    font-size: 40px;
+    letter-spacing: -1.8px;
+  }
+  .shopping-comparison {
+    padding: 16px;
+    margin-bottom: 25px;
+  }
+  .shopping-comparison h3 {
+    font-size: 18px;
+  }
+  .shopping-comparison .section-label {
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  .shelves {
+    gap: 9px;
+  }
+  .shelf-heading {
+    padding: 13px 10px;
+    min-height: 133px;
+  }
+  .shelf-heading h4 {
+    font-size: 13px;
+  }
+  .shelf-heading p {
+    font-size: 11px;
+  }
+  .shelf-heading > span {
+    font-size: 9px;
+    letter-spacing: 0.4px;
+  }
+  .shelves ol {
+    padding: 0 10px;
+  }
+  .shelves li {
+    min-height: 145px;
+    gap: 6px;
+  }
+  .shelves li strong {
+    font-size: 12px;
+  }
+  .shelves li small {
+    font-size: 10px;
+  }
+  .comparison-limit {
+    font-size: 11px;
+  }
+  .comparison-intro,
+  .shelf-takeaway {
+    font-size: 12px;
+  }
+}
