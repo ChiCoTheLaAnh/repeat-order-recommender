@@ -1436,7 +1436,7 @@ Open `/repeat-order-recommender/` on the printed local URL. See [public demo doc
 ## Grocery mode
 
 Build a short repeat-purchase list before a grocery trip. Run from the repo root
-with Python 3.10 or newer. The grocery command uses the Python standard library.
+with Python 3.9 or newer. The grocery command uses the Python standard library.
 
 ```bash
 python3 -m scripts.grocery suggest --csv examples/grocery_synthetic.csv \

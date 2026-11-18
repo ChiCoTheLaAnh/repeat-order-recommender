@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from statistics import mean, median
+from typing import Optional
 
 COLUMNS = {"shopper_id", "trip_id", "purchase_date", "item"}
 METHODS = ("previous-trip", "cadence")
@@ -181,7 +182,7 @@ def evaluate(trips: list[Trip]) -> dict:
     }
 
 
-def main(argv: list[str] | None = None) -> None:
+def main(argv: Optional[list[str]] = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     subcommands = parser.add_subparsers(dest="command", required=True)
     suggest = subcommands.add_parser("suggest", help="Make a list for one shopper")
