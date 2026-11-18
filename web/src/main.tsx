@@ -10,6 +10,7 @@ import {
   type Item,
 } from "./data";
 import "./style.css";
+import { GroceryApp } from "./GroceryApp";
 function Activity({ profile }: { profile: Profile }) {
   const [tip, setTip] = useState("");
   const max = Math.max(1, ...profile.monthly.map((m) => m.invoiceCount));
@@ -201,6 +202,7 @@ function App() {
           re<span>/</span>order<span className="wordmark-dot">.</span>
         </a>
         <nav>
+          <a href="?mode=grocery">Grocery</a>
           <a href="#how-it-works">How it works</a>
           <a href={data.metadata.repository}>GitHub </a>
         </nav>
@@ -488,6 +490,10 @@ function App() {
 }
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    {new URLSearchParams(window.location.search).get("mode") === "grocery" ? (
+      <GroceryApp />
+    ) : (
+      <App />
+    )}
   </React.StrictMode>,
 );

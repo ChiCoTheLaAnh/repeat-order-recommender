@@ -1,0 +1,196 @@
+.grocery-page {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 32px 36px 72px;
+}
+.grocery-intro {
+  max-width: 650px;
+  margin-bottom: 32px;
+}
+.grocery-intro h1 {
+  font-size: clamp(38px, 5vw, 60px);
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+  margin: 0 0 12px;
+}
+.grocery-intro p {
+  font-size: 17px;
+  color: #465675;
+  max-width: 530px;
+  margin: 0 0 20px;
+}
+.grocery-mode,
+.grocery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.grocery-mode button,
+.grocery-primary,
+.grocery-secondary {
+  font: inherit;
+  border: 1px solid #c8d4ea;
+  background: white;
+  color: #213661;
+  border-radius: 7px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+.grocery-mode button[aria-pressed="true"],
+.grocery-primary {
+  color: white;
+  background: #254dc4;
+  border-color: #254dc4;
+}
+.grocery-primary:disabled {
+  color: #546684;
+  background: #e7edf7;
+  border-color: #e7edf7;
+  cursor: default;
+}
+.grocery-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.28fr);
+  gap: 22px;
+  align-items: start;
+}
+.grocery-panel {
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  background: white;
+  padding: 22px;
+  min-width: 0;
+}
+.grocery-panel h2 {
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+.grocery-panel h3 {
+  font-size: 17px;
+  margin: 0 0 10px;
+}
+.grocery-note {
+  color: #465675;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 8px 0 12px;
+}
+.grocery-entry,
+.grocery-plan {
+  display: grid;
+  gap: 11px;
+  margin: 16px 0 0;
+  justify-items: start;
+}
+.grocery-entry label,
+.grocery-plan label,
+.grocery-manual {
+  display: grid;
+  gap: 5px;
+  font-weight: 600;
+  font-size: 14px;
+}
+.grocery-entry label {
+  width: 100%;
+}
+.grocery-entry .grocery-note {
+  margin: -3px 0 0;
+}
+.grocery-panel input[type="date"],
+.grocery-panel textarea {
+  max-width: 100%;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #afbed8;
+  border-radius: 6px;
+  background: #fbfcff;
+  color: inherit;
+  font: inherit;
+}
+.grocery-panel textarea {
+  width: 100%;
+  resize: vertical;
+  font-weight: 400;
+}
+.grocery-panel :is(button, input, textarea):focus-visible {
+  outline: 2px solid #254dc4;
+  outline-offset: 3px;
+}
+.grocery-trips,
+.grocery-suggestions {
+  list-style: none;
+  padding: 0;
+  margin: 17px 0 0;
+}
+.grocery-trips li {
+  border-top: 1px solid #e1e7f0;
+  padding: 11px 0;
+}
+.grocery-trips li p {
+  margin: 3px 0 6px;
+  color: #465675;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.grocery-secondary {
+  font-size: 12px;
+}
+.grocery-results {
+  border-top: 1px solid #dbe3ef;
+  padding-top: 16px;
+  margin-top: 16px;
+}
+.grocery-suggestions {
+  margin: 0 0 13px;
+  display: grid;
+  gap: 7px;
+}
+.grocery-suggestions label {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 10px;
+  border: 1px solid #e1e7f0;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.grocery-suggestions input {
+  margin-top: 5px;
+  accent-color: #254dc4;
+}
+.grocery-suggestions strong,
+.grocery-suggestions small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.grocery-suggestions small {
+  color: #465675;
+  margin-top: 2px;
+}
+.grocery-manual {
+  margin-top: 12px;
+}
+@media (max-width: 720px) {
+  .grocery-page {
+    padding: 24px 18px 52px;
+  }
+  .grocery-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .grocery-panel {
+    padding: 16px;
+  }
+}
+.grocery-history {
+  margin-top: 14px;
+  color: #213661;
+}
+.grocery-history summary {
+  width: fit-content;
+  font-size: 14px;
+  padding: 5px 0;
+}
+.grocery-history .grocery-trips {
+  margin-top: 7px;
+}
