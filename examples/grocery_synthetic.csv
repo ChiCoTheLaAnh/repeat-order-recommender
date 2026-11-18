@@ -1,0 +1,15 @@
+shopper_id,trip_id,purchase_date,item
+demo-student,trip-01,2026-09-01,eggs
+demo-student,trip-01,2026-09-01,oats
+demo-student,trip-02,2026-09-07,oats
+demo-student,trip-02,2026-09-07,eggs
+demo-student,trip-02,2026-09-07,bananas
+demo-student,trip-03,2026-09-17,eggs
+demo-student,trip-03,2026-09-17,eggs
+demo-student,trip-03,2026-09-17,bananas
+demo-student,trip-04,2026-09-25,oats
+demo-student,trip-04,2026-09-25,milk
+demo-student,trip-04,2026-09-25,spinach
+demo-student,trip-05,2026-09-27,eggs
+demo-student,trip-05,2026-09-27,bananas
+demo-student,trip-05,2026-09-27,chicken

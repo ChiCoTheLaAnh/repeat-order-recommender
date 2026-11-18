@@ -9,6 +9,8 @@ and temporal validation. Milestone 3 adds an immutable historical release and
 local FastAPI inference. The test split remains unopened and unevaluated by
 Milestones 2 and 3; no cloud deployment is implemented.
 
+For the local meal-prep shopping list, see [Grocery mode](#grocery-mode).
+
 ## Setup and audit
 
 Requires Python 3.10+ and [uv](https://docs.astral.sh/uv/). Python 3.12.14 was
@@ -1430,3 +1432,97 @@ npm run dev --prefix web
 ```
 
 Open `/repeat-order-recommender/` on the printed local URL. See [public demo documentation](docs/public-demo.md) for export provenance, tests, privacy boundaries and manual GitHub Pages publishing. Public deployment is verified separately from build success.
+
+## Grocery mode
+
+Build a short repeat-purchase list before a grocery trip. Run from the repo root
+with Python 3.10 or newer. The grocery command uses the Python standard library.
+
+```bash
+python3 -m scripts.grocery suggest --csv examples/grocery_synthetic.csv \
+  --shopper-id demo-student --planned-date 2026-09-27
+```
+
+Example output from the **synthetic demo**:
+
+```text
+1. eggs: You usually buy eggs every 8 days. It’s been 10 days since your last purchase.
+2. bananas: You bought bananas on 2 trips. It’s been 10 days since your last purchase.
+3. milk: You bought milk on 1 trip. It’s been 2 days since your last purchase.
+4. spinach: You bought spinach on 1 trip. It’s been 2 days since your last purchase.
+```
+
+Use `--method previous-trip` to see the same shopper's most recent prior basket
+instead. The baseline lists up to five distinct items from that trip in
+alphabetical order. If several prior trips have the same latest date, the
+lexically last trip ID breaks the tie because the CSV has no time of day.
+
+For your own data, copy the format in
+[`examples/grocery_synthetic.csv`](examples/grocery_synthetic.csv). Use
+`shopper_id,trip_id,purchase_date,item`, one row per item bought on a completed
+trip. Use `YYYY-MM-DD` dates, consistent names for the same product, and a
+unique trip ID per shopper per trip. Multiple items share the trip ID and date.
+IDs are trimmed and kept as strings. Item matching folds case and whitespace.
+Multiple rows for the same item on a trip count once. Use an ignored location
+such as `data/` for personal purchase histories.
+
+```bash
+python3 -m scripts.grocery suggest --csv data/my_groceries.csv \
+  --shopper-id me --planned-date 2026-11-22
+```
+
+The cadence ranker uses only this shopper's trips dated **strictly before** the
+planned date. It estimates a median gap once an item has three distinct purchase
+dates, giving at least two gaps. It skips items whose elapsed time is below that
+median. For items due or overdue, it ranks by elapsed days divided by the median
+gap. With fewer than three dates, it fills open slots by distinct trip count,
+then by most recent purchase. Frequency and recency also resolve equal cadence
+scores. Final ties use normalized item names. The list can have fewer than
+five items. It estimates purchase timing from past receipts and cannot tell
+how much food is currently at home.
+
+### Evaluate on a later trip
+
+```bash
+# Exercise the evaluation path on the synthetic fixture.
+python3 -m scripts.grocery evaluate --csv examples/grocery_synthetic.csv \
+  --data-kind synthetic
+
+# Print aggregate metrics once you have real grocery history.
+python3 -m scripts.grocery evaluate --csv data/my_groceries.csv --data-kind real
+```
+
+For each shopper, hold out the latest purchase date. If multiple trips share
+that date, score each as a separate target using the same strictly earlier
+history. A target item must appear both on the held-out trip and in an earlier
+trip. Both methods rank the same history before any held-out items are used to
+score them. Precision@5 divides hits by five, including when fewer items are
+returned. Recall@5 divides hits by the number of distinct repeat targets. Both
+are averaged over held-out trips with at least one repeat target. The report
+counts shoppers without earlier history and held-out trips with no repeat
+targets separately. Metrics are `null` if no trips can be scored.
+
+The bundled CSV is synthetic and the demo evaluation prints protocol counts
+only. No real grocery history was supplied for this implementation. For a small
+pilot, record which suggestions each student would keep and which reminded them
+of something they had nearly forgotten. That's a different measure from
+whether suggestions matched their later receipt.
+
+### Relationship to the retail benchmark
+
+The existing retail pipeline normalizes `customer_id`, `invoice_id`,
+`invoice_date`, and `sku` in `scripts/clean_transactions.py`. They correspond
+to the grocery CSV's shopper, trip, date, and item. Retail snapshot and
+feature code in `scripts/temporal_snapshots.py` and
+`scripts/ranking_features.py` establish the strictly earlier history and
+distinct invoice counting used here as well. The retail retrieval policy,
+model scoring and evaluation live in `scripts/retrieval.py`,
+`scripts/ranking_models.py`, and `scripts/ranking_evaluation.py`.
+The grocery command uses the same temporal and distinct-visit conventions with
+a lightweight CSV reader and a cadence ranker. It is a separate
+`python -m scripts` entry point like `scripts.training_baselines` and
+`scripts.local_api`. The existing retail commands above still apply.
+
+```bash
+python3 -m unittest discover -s tests -p test_grocery.py -v
+```
