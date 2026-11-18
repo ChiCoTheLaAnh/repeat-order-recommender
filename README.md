@@ -1435,6 +1435,26 @@ Open `/repeat-order-recommender/` on the printed local URL. See [public demo doc
 
 ## Grocery mode
 
+### Try it in the browser
+
+Open **Grocery** from the existing demo navigation or add `?mode=grocery` to the
+demo URL. To preview a local build, run `npm ci --prefix web` and
+`npm run dev --prefix web`, then use the printed URL.
+
+Use **Try sample** to start with fictional trips, or choose **My trips** and add a
+completed trip by typing or pasting one item on each line. Set the next trip's
+date, generate suggestions and tick what you want to copy. You can edit or remove
+a trip under **View trips**. Personal trip entries are saved to local browser
+storage on that device. The page derives suggestions and formats the shopping
+list in the browser. Clearing browser site data removes the saved trips.
+
+The web version implements the cadence rules below. It uses lowercase item
+matching and whitespace normalization for manually entered names, while the
+Python CSV command uses Unicode case folding. The synthetic example yields
+the same four suggestions in both versions.
+
+### Run from the command line
+
 Build a short repeat-purchase list before a grocery trip. Run from the repo root
 with Python 3.9 or newer. The grocery command uses the Python standard library.
 
